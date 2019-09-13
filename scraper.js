@@ -2,6 +2,9 @@ import axios from 'axios'
 import cheerio from 'cheerio'
 import Nightmare from 'nightmare'
 
+// Auto sorts by cheapest price, so do we really need to keep scrolling?
+// Maybe for flight from cheapest provider
+// If provider isn't present in top 10 list, scroll
 async function scrap() {
   const nightmare = Nightmare()
   const url = "https://skiplagged.com/flights/NYC/SFO/2019-09-27/2019-10-20"
@@ -49,6 +52,7 @@ async function scrap() {
     console.log(price)
     console.log('====================================');
 
+    // TODO
     // If everything is valid, return
     // If not, log error/missing components, move onto next element. Do NOT add to list of return objects
   })
