@@ -1,0 +1,15 @@
+# Editor configuration, see http://editorconfig.org
+root = true
+
+[*]
+end_of_line = lf
+indent_size = 2
+indent_style = space
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+[*.dart]
+charset = utf-8
+
+[*.adoc]
+charset = utf-8
