@@ -54,7 +54,10 @@ export async function googleFlights() {
     const processEndTime = process.hrtime(processStartTime);
     console.log(`GoogleFlights: ${processEndTime[0]}s ${processEndTime[1]}nanos`);
 
-    return trips;
+    return {
+      time: processEndTime,
+      data: trips,
+    };
 
     // Keeping this for future demos
 
@@ -72,5 +75,3 @@ export async function googleFlights() {
     // console.log(listContainer);
     // console.log('====================================');
 }
-
-googleFlights().then(res => console.log(res));

@@ -63,7 +63,10 @@ export async function skiplaggedFlights() {
   })
   const processEndTime = process.hrtime(processStartTime);
   console.log(`skiplaggedFlights: ${processEndTime[0]}s ${processEndTime[1]}nanos`);
-  return tripsData;
+  return {
+    time: processEndTime,
+    data: tripsData,
+  };
 
   // const trips = [];
   // console.log('====================================');
