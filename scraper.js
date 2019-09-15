@@ -1,5 +1,5 @@
-import { skiplaggedFlights } from "./skiplagged";
-import { googleFlights } from "./googleFlights";
+import { skiplaggedFlights } from "./controllers/skiplagged";
+import { googleFlights } from "./controllers/googleFlights";
 
 skiplaggedFlights().then(res => {
   console.log('SkipLagged:')
