@@ -3,7 +3,7 @@ import Nightmare from 'nightmare'
 
 export async function southwestFlights() {
   const processStartTime = process.hrtime()
-  const nightmare = Nightmare()
+  const nightmare = new Nightmare()
   const url = "https://www.southwest.com/air/booking/select.html?adultPassengersCount=1&departureDate=2019-09-28&departureTimeOfDay=ALL_DAY&destinationAirportCode=SFO&fareType=USD&int=HOMEQBOMAIR&originationAirportCode=BOS&passengerType=ADULT&reset=true&returnDate=&returnTimeOfDay=ALL_DAY&seniorPassengersCount=0&tripType=oneway"
   const sel = 'div[class*="card"]';
 

@@ -1,13 +1,14 @@
 import axios from 'axios'
 import cheerio from 'cheerio'
 import Nightmare from 'nightmare'
+import { flightAggregator } from './shared'
 
 // Auto sorts by cheapest price, so do we really need to keep scrolling?
 // Maybe for flight from cheapest provider
 // If provider isn't present in top 10 list, scroll
 export async function skiplaggedFlights() {
   const processStartTime = process.hrtime()
-  const nightmare = Nightmare()
+  const nightmare = new Nightmare()
   const url = "https://skiplagged.com/flights/NYC/SFO/2019-09-27/2019-10-20"
 
   // TODO Scroll to bottom of page
@@ -21,10 +22,10 @@ export async function skiplaggedFlights() {
     .end();
 
   const scraper = cheerio.load(listContainer);
-  const totalTrips = scraper('.trip').length;
+  // const totalTrips = scraper('.trip').length;
   const tripsData = [];
   scraper('.trip').each(async function (i, elem) {
-    const trip = {};
+    const trip: any = {};
 
     // the text selector in this call returns all of the plain text
     // under the div we've selected, resulting in a string like "11h1 stop"
@@ -46,15 +47,11 @@ export async function skiplaggedFlights() {
 
     // TODO trip path
 
-
-    // console.log('====================================');
-    // console.log(airlineNumbers);
-    // console.log(price)
-    // console.log('====================================');
-
     // TODO
     // If everything is valid, return
     // If not, log error/missing components, move onto next element. Do NOT add to list of return objects
+
+    // current validation is naiive -> check if current trip has a price
     if (trip.price) {
       tripsData.push(trip);
     } else {
@@ -67,11 +64,6 @@ export async function skiplaggedFlights() {
     time: processEndTime,
     data: tripsData,
   };
-
-  // const trips = [];
-  // console.log('====================================');
-  // console.log(scraper('.trip').length);
-  // console.log('====================================');
 }
 
 function getAirlineNumbers(airlineData) {

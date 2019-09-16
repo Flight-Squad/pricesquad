@@ -1,9 +1,10 @@
 import cheerio from 'cheerio'
 import Nightmare from 'nightmare'
+import { flightAggregator } from './shared'
 
 export async function kayakFlights() {
   const processStartTime = process.hrtime()
-  const nightmare = Nightmare()
+  const nightmare = new Nightmare()
   const url = "https://www.kayak.com/flights/BOS-BWI/2019-09-26?sort=bestflight_a"
   const sel = 'div[class*="card"]';
 
@@ -38,10 +39,16 @@ export async function kayakFlights() {
       prices.push(scraper(this).find('.above-button').find('.price.option-text').text().trim());
 
     })
-    console.log(airlines);
-    console.log(durations);
-    console.log(stops);
-    console.log(prices);
-}
+    // console.log(airlines);
+    // console.log(durations);
+    // console.log(stops);
+    // console.log(prices);
+    const trips = flightAggregator.makeTripsData(prices, stops, airlines, durations);
+    const processEndTime = process.hrtime(processStartTime);
+    console.log(`KayakFlights: ${processEndTime[0]}s ${processEndTime[1]}nanos`);
 
-kayakFlights()
+    return {
+      time: processEndTime,
+      data: trips,
+    };
+}

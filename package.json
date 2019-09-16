@@ -4,13 +4,38 @@
   "main": "index.js",
   "license": "All Rights Reserved",
   "scripts": {
-    "start": "node -r esm scraper.js"
+    "clean": "rm -r ./bin",
+    "compile": "NODE_ENV=development tsc",
+    "compile:win": "SET NODE_ENV=development&& tsc",
+    "start": "npm run compile && node ./bin/index",
+    "start:win": "npm run compile:win && node ./bin/index",
+    "test": "npm run compile && ava",
+    "test:win": "npm run compile:win && ava",
+    "test-cover": "c8 --check-coverage --lines 100 npm run test",
+    "test-cover:win": "c8 --check-coverage --lines 100 npm run test:win"
   },
   "dependencies": {
+    "@types/express": "^4.17.1",
+    "@types/nightmare": "^2.10.4",
+    "@types/node": "^12.7.5",
+    "ava": "^2.4.0",
     "axios": "^0.19.0",
+    "c8": "^5.0.4",
     "cheerio": "^1.0.0-rc.3",
     "dotenv": "^8.1.0",
     "esm": "^3.2.25",
-    "nightmare": "^3.0.2"
+    "express": "^4.17.1",
+    "module-alias": "^2.2.1",
+    "nightmare": "^3.0.2",
+    "typescript": "^3.6.3"
+  },
+  "_moduleAliases": {
+    "controllers": "./bin/controllers",
+    "api": "./bin/api",
+    "models": "./bin/models",
+    "tests": "./bin/tests"
+  },
+  "devDependencies": {
+    "ts-node": "^8.4.1"
   }
 }
