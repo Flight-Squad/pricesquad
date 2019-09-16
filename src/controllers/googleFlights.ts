@@ -49,5 +49,3 @@ export async function googleFlights(params) {
       data: trips,
     };
 }
-
-googleFlights({}).then(res => console.log(res));
