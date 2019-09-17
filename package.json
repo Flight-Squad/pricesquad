@@ -15,9 +15,12 @@
     "test-cover:win": "c8 --check-coverage --lines 100 npm run test:win"
   },
   "dependencies": {
+    "@types/app-root-path": "^1.2.4",
     "@types/express": "^4.17.1",
+    "@types/morgan": "^1.7.37",
     "@types/nightmare": "^2.10.4",
     "@types/node": "^12.7.5",
+    "app-root-path": "^2.2.1",
     "ava": "^2.4.0",
     "axios": "^0.19.0",
     "c8": "^5.0.4",
@@ -26,12 +29,15 @@
     "esm": "^3.2.25",
     "express": "^4.17.1",
     "module-alias": "^2.2.1",
+    "morgan": "^1.9.1",
     "nightmare": "^3.0.2",
-    "typescript": "^3.6.3"
+    "typescript": "^3.6.3",
+    "winston": "^3.2.1"
   },
   "_moduleAliases": {
     "controllers": "./bin/controllers",
     "api": "./bin/api",
+    "config": "./bin/config",
     "models": "./bin/models",
     "tests": "./bin/tests"
   },
