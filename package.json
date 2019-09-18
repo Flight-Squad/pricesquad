@@ -2,7 +2,7 @@
   "name": "pricesquad",
   "version": "1.0.0",
   "main": "index.js",
-  "license": "All Rights Reserved",
+  "license": "SEE LICENSE IN LICENSE",
   "scripts": {
     "clean": "rm -r ./bin",
     "compile": "NODE_ENV=development tsc",
