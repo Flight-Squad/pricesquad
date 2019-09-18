@@ -3,8 +3,9 @@ export const flightAggregator = Object.freeze({
 })
 
 export const airline = Object.freeze({
-  makeTripsData: {},
+  makeTripsData: () => {},
 })
+
 /**
  * Returns Array of objects
  * @param {*} prices

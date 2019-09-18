@@ -38,7 +38,7 @@
     "controllers": "./bin/controllers",
     "api": "./bin/api",
     "config": "./bin/config",
-    "models": "./bin/models",
+    "data": "./bin/data",
     "tests": "./bin/tests"
   },
   "devDependencies": {
