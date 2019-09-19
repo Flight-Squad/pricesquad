@@ -1,7 +1,7 @@
 import axios from 'axios'
 import cheerio from 'cheerio'
 import Nightmare from 'nightmare'
-import { flightAggregator } from './shared'
+import { flightAggregator } from './shared/shared'
 
 // Auto sorts by cheapest price, so do we really need to keep scrolling?
 // Maybe for flight from cheapest provider

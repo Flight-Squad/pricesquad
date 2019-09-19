@@ -1,6 +1,6 @@
 import cheerio from 'cheerio'
 import Nightmare from 'nightmare'
-import { flightAggregator } from './shared'
+import { flightAggregator } from './shared/shared'
 
 export async function kayakFlights() {
   const processStartTime = process.hrtime()

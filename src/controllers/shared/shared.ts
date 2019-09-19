@@ -29,6 +29,17 @@ function makeAggregatorTripsData(prices, stops, airlines, durations) {
   } else {
     // Warn and put it in a try catch and return what you can
     console.log('DATA NOT CONSISTENT');
+    console.log({
+      prices: prices.length,
+      stops: stops.length,
+      airlines: airlines.length,
+      durations: durations.length
+    });
+
+    console.log(prices);
+    console.log(stops);
+    console.log(airlines);
+    console.log(durations);
   }
   return trips;
 }

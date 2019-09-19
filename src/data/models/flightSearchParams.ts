@@ -23,3 +23,24 @@ export function validateFlightSearchParams(params: IFlightSearchParams) {
   // If is round trip, must have return date later than depart date
   // use moment
 }
+
+/**
+ * Takes request data and processes it for easier use with controllers
+ *
+ * @param data
+ */
+export function makeFlightSearchParams(data: any): IFlightSearchParams {
+  const params: any = {
+    origin: data.origin,
+    dest: data.dest,
+    departDate: new Date(data.departDate),
+    isRoundTrip: data.isRoundTrip,
+    numStops: data.numStops
+  };
+
+  if (data.returnDate) {
+    params.returnDate = new Date(data.returnDate);
+  }
+
+  return params;
+}

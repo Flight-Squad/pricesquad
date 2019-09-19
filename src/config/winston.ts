@@ -1,5 +1,6 @@
 // https://www.digitalocean.com/community/tutorials/how-to-use-winston-to-log-node-js-applications
 var appRoot = require('app-root-path');
+import { Logger, LoggerOptions } from 'winston';
 var winston = require('winston');
 
 // define the custom settings for each transport (file, console)
@@ -22,7 +23,7 @@ var options = {
 };
 
 // instantiate a new Winston Logger with the settings defined above
-var logger = new winston.Logger({
+var logger: Logger = winston.createLogger({
   transports: [
     new winston.transports.File(options.file),
     new winston.transports.Console(options.console)
@@ -30,12 +31,14 @@ var logger = new winston.Logger({
   exitOnError: false, // do not exit on handled exceptions
 });
 
-// create a stream object with a 'write' function that will be used by `morgan`
-logger.stream = {
-  write: function(message, encoding) {
-    // use the 'info' log level so the output will be picked up by both transports (file and console)
-    logger.info(message);
-  },
-};
+/**
+ * To pipe 'morgan' logs to winston
+ * https://stackoverflow.com/a/51918846
+ */
+export class LoggerStream {
+  write(message: string) {
+      logger.info(message.substring(0, message.lastIndexOf('\n')));
+  }
+}
 
 export default logger;
