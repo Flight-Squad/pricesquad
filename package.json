@@ -29,6 +29,7 @@
     "esm": "^3.2.25",
     "express": "^4.17.1",
     "module-alias": "^2.2.1",
+    "moment-timezone": "^0.5.26",
     "morgan": "^1.9.1",
     "nightmare": "^3.0.2",
     "typescript": "^3.6.3",
