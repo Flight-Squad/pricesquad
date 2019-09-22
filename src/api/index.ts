@@ -12,6 +12,7 @@ var app = express();
 // https://stackoverflow.com/a/51918846
 app.use(morgan('combined', { stream: new LoggerStream() }));
 app.use(express.json());
+app.use(express.urlencoded());
 
 app.use(routes.scrapers.baseRoute, flightScraperRouter);
 
