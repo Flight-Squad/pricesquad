@@ -4,6 +4,7 @@ import appRoot from 'app-root-path'
 import winston, { LoggerStream } from 'config/winston';
 import flightScraperRouter from './flightScrapers';
 import routes from './config/routeDefinitions';
+import StatusCodes from './config/statusCodes';
 
 var app = express();
 
@@ -15,6 +16,7 @@ app.use(express.json());
 app.use(routes.scrapers.baseRoute, flightScraperRouter);
 
 const port = process.env.PORT || 3000;
+app.get('/', (req, res) => {
+  res.status(StatusCodes.Get.success).send('Hi');
+})
 app.listen(port, () => winston.info(`Listening on port ${port}`))
-
-
