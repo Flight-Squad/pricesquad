@@ -71,13 +71,15 @@ RUN chmod +x /bin/tini
 #=====================
 COPY rootfs /
 
-EXPOSE 3000
+# EXPOSE doesn't actually expose the port, and it could confuse some cloud providers
+# EXPOSE 3000
 
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 ADD . /usr/src/app
 
 RUN yarn install
+RUN chmod 777 /startup.sh
 RUN /startup.sh
 CMD [ "npm", "run", "docker" ]
 # ENV HOME=/home/ubuntu \
