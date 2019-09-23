@@ -1,28 +1,28 @@
-import { Router } from "express";
-import { googleFlights } from "controllers/googleFlights";
-import { kayakFlights } from "controllers/kayak";
-import routes from "./config/routeDefinitions";
-import StatusCodes from "./config/statusCodes";
-import { southwestFlights } from "controllers/southwest";
-import { skiplaggedFlights } from "controllers/skiplagged";
-import { IFlightSearchParams, makeFlightSearchParams } from "data/models/flightSearchParams";
 import logger from "config/winston";
 import { convertHrTimeToNanos } from "data/dateProcessor";
+import { IFlightSearchParams, makeFlightSearchParams } from "data/models/flightSearchParams";
+import { Router } from "express";
+import routes from "api/config/routeDefinitions";
+import { googleFlights } from "./google/post";
+import StatusCodes from "api/config/statusCodes";
 
-var router = Router();
+const router = Router();
 
+// Using POST because sensitive information will eventually be passed through this route
 router.post(routes.scrapers.googleFlights.baseRoute, async function(req, res) {
   const params: IFlightSearchParams = makeFlightSearchParams(req.body);
   const searchResults = await googleFlights(params);
 
-  logger.info(JSON.stringify({
-    time: {
-      appxSecs: searchResults.time[0], // seconds
-      time: convertHrTimeToNanos(searchResults.time),
-      units: 'nanos',
-    },
-    url: searchResults.url,
-  }))
+  logger.info(
+    JSON.stringify({
+      time: {
+        appxSecs: searchResults.time[0], // seconds
+        time: convertHrTimeToNanos(searchResults.time),
+        units: "nanos"
+      },
+      url: searchResults.url
+    })
+  );
 
   res.status(StatusCodes.Post.success).json(searchResults.data);
 });

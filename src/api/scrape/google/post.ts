@@ -1,6 +1,5 @@
 import cheerio from 'cheerio'
 import Nightmare from 'nightmare'
-import { flightAggregator } from './shared/shared'
 import { IFlightSearchParams, FlightStops, validateFlightSearchParams } from 'data/models/flightSearchParams';
 import { formatDateAsKebab } from 'data/dateProcessor';
 import { text } from 'body-parser';
