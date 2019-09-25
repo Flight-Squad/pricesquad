@@ -1,10 +1,14 @@
 import logger from "config/winston";
 import { convertHrTimeToNanos } from "data/dateProcessor";
-import { IFlightSearchParams, makeFlightSearchParams } from "data/models/flightSearchParams";
+import {
+  IFlightSearchParams,
+  makeFlightSearchParams
+} from "data/models/flightSearchParams";
 import { Router } from "express";
 import routes from "api/config/routeDefinitions";
 import { googleFlights } from "./google/post";
 import StatusCodes from "api/config/statusCodes";
+import { kayakFlights } from "./kayak/post";
 
 const router = Router();
 
@@ -24,16 +28,27 @@ router.post(routes.scrapers.googleFlights.baseRoute, async function(req, res) {
     })
   );
 
-  res.status(StatusCodes.Post.success).json(searchResults.data);
+  res
+    .status(StatusCodes.Post.success)
+    .json({ data: searchResults.data, url: searchResults.url });
 });
 
-// TODO these need to be added in later
+router.post(routes.scrapers.kayak.baseRoute, async function(req, res) {
+  const params: IFlightSearchParams = makeFlightSearchParams(req.body);
+  const searchResults = await kayakFlights(params);
 
-// router.post(routes.scrapers.kayak.baseRoute, async function (req, res) {
-//   const searchResults = await kayakFlights(req.body);
-//   // TODO log process time
-//   res.status(StatusCodes.Post.success).json(searchResults);
-// })
+  logger.info(
+    JSON.stringify({
+      time: {
+        appxSecs: searchResults.time[0], // seconds
+        time: convertHrTimeToNanos(searchResults.time),
+        units: "nanos"
+      },
+      url: searchResults.url
+    })
+  );
+  res.status(StatusCodes.Post.success).json({ data: searchResults.data, url: searchResults.url });
+});
 
 // router.post(routes.scrapers.southwest.baseRoute, async function (req, res) {
 //   const searchResults = await southwestFlights(req.body);
