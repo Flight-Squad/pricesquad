@@ -98,11 +98,8 @@ function makeUrl(params: IFlightSearchParams) {
     reset: true, // FIXME Might have to change this to a string
     seniorPassengersCount: 0,
     tripType: params.isRoundTrip ? 'roundtrip' : 'oneway',
-  }
-
-  if (params.isRoundTrip) {
-    urlParamData.returnDate = formatDateAsKebab(params.returnDate);
-    urlParamData.returnTimeOfDay = 'All_DAY';
+    returnDate: params.isRoundTrip ? formatDateAsKebab(params.returnDate) : '',
+    returnTimeOfDay: 'ALL_DAY',
   }
 
   const urlParams = querystring.encode(urlParamData);
@@ -110,8 +107,3 @@ function makeUrl(params: IFlightSearchParams) {
 
   return url;
 }
-
-// https://www.southwest.com/air/booking/select.html?adultPassengersCount=1&departureDate=2019-10-01&departureTimeOfDay=ALL_DAY&destinationAirportCode=SFO&fareType=USD&originationAirportCode=BOS&passengerType=ADULT&reset=true&returnTimeOfDay=All_DAY&seniorPassengersCount=0&tripType=oneway
-// https://www.southwest.com/air/booking/select.html?adultPassengersCount=1&departureDate=2019-10-26&departureTimeOfDay=ALL_DAY&destinationAirportCode=BWI&fareType=USD&originationAirportCode=BOS&passengerType=ADULT&reset=true&returnDate=&returnTimeOfDay=ALL_DAY&seniorPassengersCount=0&tripType=oneway
-
-// https://www.southwest.com/air/booking/select.html?adultPassengersCount=1&departureDate=2019-10-26&departureTimeOfDay=ALL_DAY&destinationAirportCode=BWI&fareType=USD&originationAirportCode=BOS&passengerType=ADULT&reset=true&returnDate=2019-11-01&returnTimeOfDay=ALL_DAY&seniorPassengersCount=0&tripType=roundtrip
