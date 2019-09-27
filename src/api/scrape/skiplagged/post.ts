@@ -17,6 +17,8 @@ export async function skiplaggedFlights(params: IFlightSearchParams) {
     : "";
   const url = `https://skiplagged.com/flights/${origin}/${dest}/${departDate}/${returnDate}`;
 
+  logger.debug(url);
+
   // TODO Scroll to bottom of page
   // https://github.com/segmentio/nightmare/issues/625#issuecomment-217730846
   // very naive method - will infinite loop on a truly infinite scrolling page
