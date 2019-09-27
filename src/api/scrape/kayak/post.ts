@@ -52,7 +52,6 @@ export async function kayakFlights(params: IFlightSearchParams) {
     // console.log(prices);
     const trips = makeAggregatorTripsData(prices, stops, airlines, durations);
     const processEndTime = process.hrtime(processStartTime);
-    console.log(`KayakFlights: ${processEndTime[0]}s ${processEndTime[1]}nanos`);
 
     return {
       time: processEndTime,

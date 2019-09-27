@@ -75,9 +75,6 @@ export async function skiplaggedFlights(params: IFlightSearchParams) {
   const scrapeEndTime = process.hrtime(scrapeStartTime);
   logger.debug(`scrape proc time=${scrapeEndTime[0]}.${scrapeEndTime[1]}`)
   const processEndTime = process.hrtime(processStartTime);
-  console.log(
-    `skiplaggedFlights: ${processEndTime[0]}s ${processEndTime[1]}nanos`
-  );
   return {
     time: processEndTime,
     data: tripsData,
