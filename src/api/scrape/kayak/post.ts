@@ -11,7 +11,7 @@ export async function kayakFlights(params: IFlightSearchParams) {
   const roundTripQuery = makeRoundTripQuery(params);
   const stopsQuery = makeStopsQuery(params);
   const departDate = formatDateAsKebab(params.departDate);
-  const url = `https://www.kayak.com/flights/${params.origin}-${params.dest}/${departDate}${roundTripQuery}?sort=bestflight_a${stopsQuery}`
+  const url = `https://www.kayak.com/flights/${params.origin}-${params.dest}/${departDate}${roundTripQuery}?sort=price_a${stopsQuery}`
   const sel = 'div[class*="card"]';
 
   logger.info(url);
@@ -19,8 +19,8 @@ export async function kayakFlights(params: IFlightSearchParams) {
   const listContainer = await nightmare
     .header('user-agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.75 Safari/537.36')
     .goto(url)
-    .wait('.Flights-Results-BestFlights')
-    .evaluate(() => document.querySelector('.best-flights-list-results').outerHTML)
+    .wait('.Flights-Results-FlightResultsList')
+    .evaluate(() => document.querySelector('.Flights-Results-FlightResultsList').outerHTML)
     .end();
 
     const scraper = cheerio.load(listContainer);

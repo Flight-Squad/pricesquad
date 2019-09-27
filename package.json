@@ -8,11 +8,11 @@
   },
   "scripts": {
     "clean": "rm -r ./bin",
-    "compile": "NODE_ENV=development tsc",
+    "compile": "tsc",
     "compile:win": "SET NODE_ENV=development&& tsc",
     "docker": "xvfb-run -e /dev/stdout -a --server-args=\"-screen 0 1280x1028x24 -ac +extension GLX +render -nolisten unix\" npm run start",
     "docker:debug": "DEBUG=* xvfb-run -e /dev/stdout -a --server-args=\"-screen 0 1280x1028x24 -ac +extension GLX +render -nolisten unix\" npm run start",
-    "start": "DEBUG=* npm run compile && node ./bin/index",
+    "start": "npm run compile && node ./bin/index",
     "start:win": "npm run compile:win && node ./bin/index",
     "test": "npm run compile && ava",
     "test:win": "npm run compile:win && ava",
