@@ -12,7 +12,7 @@ export async function skiplaggedFlights(params: IFlightSearchParams) {
   const nightmare = new Nightmare();
   let { origin, dest } = params;
   const departDate = formatDateAsKebab(params.departDate);
-  const returnDate = params.returnDate
+  const returnDate = params.isRoundTrip
     ? formatDateAsKebab(params.returnDate)
     : "";
   const url = `https://skiplagged.com/flights/${origin}/${dest}/${departDate}/${returnDate}`;

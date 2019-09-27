@@ -1,6 +1,5 @@
 import cheerio from 'cheerio'
 import Nightmare from 'nightmare'
-import { flightAggregator } from 'controllers/shared'
 import { IFlightSearchParams, FlightStops } from 'data/models/flightSearchParams'
 import logger from 'config/winston'
 import { formatDateAsKebab } from 'data/dateProcessor'
@@ -51,7 +50,7 @@ export async function kayakFlights(params: IFlightSearchParams) {
     // console.log(durations);
     // console.log(stops);
     // console.log(prices);
-    const trips = flightAggregator.makeTripsData(prices, stops, airlines, durations);
+    const trips = makeAggregatorTripsData(prices, stops, airlines, durations);
     const processEndTime = process.hrtime(processStartTime);
     console.log(`KayakFlights: ${processEndTime[0]}s ${processEndTime[1]}nanos`);
 
@@ -63,7 +62,7 @@ export async function kayakFlights(params: IFlightSearchParams) {
 }
 
 function makeRoundTripQuery(params: IFlightSearchParams) {
-  if (params.returnDate) {
+  if (params.isRoundTrip) {
     return '/' + formatDateAsKebab(params.returnDate);
   }
   return '';
@@ -75,4 +74,43 @@ function makeStopsQuery(params: IFlightSearchParams) {
     case FlightStops.OneStop: return '&fs=stops=-2';
     default: return '';
   }
+}
+
+/**
+ * Returns Array of objects
+ * @param {*} prices
+ * @param {*} stops
+ * @param {*} airlines
+ * @param {*} durations
+ */
+function makeAggregatorTripsData(prices, stops, airlines, durations) {
+  // Everything has same number of elements
+  const dataIsConsistent = prices.length === stops.length && stops.length === durations.length && stops.length === airlines.length;
+  const trips = [];
+  if (dataIsConsistent) {
+    for (let i = 0; i < stops.length; i ++) {
+      trips.push({
+        price: prices[i],
+        stops: stops[i],
+        airline: airlines[i],
+        duration: durations[i],
+      })
+    }
+  } else {
+    // Warn and put it in a try catch and return what you can
+    const lengthData = {
+      prices: prices.length,
+      stops: stops.length,
+      airlines: airlines.length,
+      durations: durations.length
+    };
+    const totalData = {
+      prices,
+      stops,
+      airlines,
+      durations,
+    }
+    logger.error(`Kayak data not consistent--${JSON.stringify(lengthData)}--${JSON.stringify(totalData)}`)
+  }
+  return trips;
 }
