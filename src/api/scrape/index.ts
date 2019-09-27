@@ -9,6 +9,7 @@ import routes from "api/config/routeDefinitions";
 import { googleFlights } from "./google/post";
 import StatusCodes from "api/config/statusCodes";
 import { kayakFlights } from "./kayak/post";
+import { skiplaggedFlights } from "./skiplagged/post";
 
 const router = Router();
 
@@ -47,7 +48,9 @@ router.post(routes.scrapers.kayak.baseRoute, async function(req, res) {
       url: searchResults.url
     })
   );
-  res.status(StatusCodes.Post.success).json({ data: searchResults.data, url: searchResults.url });
+  res
+    .status(StatusCodes.Post.success)
+    .json({ data: searchResults.data, url: searchResults.url });
 });
 
 // router.post(routes.scrapers.southwest.baseRoute, async function (req, res) {
@@ -56,10 +59,22 @@ router.post(routes.scrapers.kayak.baseRoute, async function(req, res) {
 //   res.status(StatusCodes.Post.success).json(searchResults);
 // })
 
-// router.post(routes.scrapers.skiplagged.baseRoute, async function (req, res) {
-//   const searchResults = await skiplaggedFlights(req.body);
-//   // TODO log process time
-//   res.status(StatusCodes.Post.success).json(searchResults);
-// })
+router.post(routes.scrapers.skiplagged.baseRoute, async function(req, res) {
+  const params: IFlightSearchParams = makeFlightSearchParams(req.body);
+  const searchResults = await skiplaggedFlights(params);
+  logger.info(
+    JSON.stringify({
+      time: {
+        appxSecs: searchResults.time[0], // seconds
+        time: convertHrTimeToNanos(searchResults.time),
+        units: "nanos"
+      },
+      url: searchResults.url
+    })
+  );
+  res
+    .status(StatusCodes.Post.success)
+    .json({ data: searchResults.data, url: searchResults.url });
+});
 
 export default router;
