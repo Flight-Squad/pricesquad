@@ -13,7 +13,7 @@ export enum FlightStops {
   AnyStops
 }
 
-export function validateFlightSearchParams(params: IFlightSearchParams) {
+export async function validateFlightSearchParams(params: IFlightSearchParams) {
   // orig and dest must be non empty and conform to existing airport/region code
   if (!(params.origin.trim() && params.dest.trim()) ||
   // naiive validation on existing code

@@ -4,6 +4,12 @@ const StatusCodes = Object.freeze({
   },
   Post: {
     success: 201,
+  },
+  Error: {
+    Client:{
+      BadRequest: 400,
+    },
+    Server: {},
   }
 })
 
