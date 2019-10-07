@@ -14,5 +14,6 @@ RUN yarn --pure-lockfile
 ADD . .
 
 # EXPOSE doesn't actually expose the port, and it could confuse some cloud providers
-EXPOSE 3000
+# EXPOSE 3000
+
 CMD [ "yarn", "run", "docker" ]
