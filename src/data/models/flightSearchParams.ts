@@ -1,3 +1,25 @@
+export interface IPriceRequestQuery {
+  origin: string;
+  dest: string;
+  departDate: string;
+  returnDate?: string;
+  isRoundTrip: boolean;
+  numStops: FlightStops;
+}
+
+export async function validatePriceRequestQueryParams(params: IPriceRequestQuery) {
+  if (!(params.origin.trim() && params.dest.trim()) ||
+  // naiive validation on existing code
+   (params.origin.length < 3 || params.dest.length < 3)) {
+    throw new Error('origin and dest must be proper codes')
+  }
+
+  if (!params.departDate) throw new Error('No depart Date provided');
+  if (params.isRoundTrip) {
+    if (!params.returnDate) throw new Error('No return date provided (trip is a round trip)')
+  }
+}
+
 export interface IFlightSearchParams {
   origin: string;
   dest: string;

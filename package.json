@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "SEE LICENSE IN LICENSE",
   "engines": {
-    "node" : ">=12.0"
+    "node": ">=12.0"
   },
   "scripts": {
     "clean": "rm -r ./bin",
@@ -12,8 +12,8 @@
     "compile:win": "SET NODE_ENV=development&& tsc",
     "docker": "xvfb-run -e /dev/stdout -a --server-args=\"-screen 0 1280x1028x24 -ac +extension GLX +render -nolisten unix\" npm run start",
     "docker:debug": "DEBUG=* xvfb-run -e /dev/stdout -a --server-args=\"-screen 0 1280x1028x24 -ac +extension GLX +render -nolisten unix\" npm run start",
-    "start": "npm run compile && node ./bin/index",
-    "start:win": "npm run compile:win && node ./bin/index",
+    "start": "npm run compile && node -r dotenv/config ./bin/index",
+    "start:win": "npm run compile:win && node -r dotenv/config ./bin/index",
     "test": "npm run compile && ava",
     "test:win": "npm run compile:win && ava",
     "test-cover": "c8 --check-coverage --lines 100 npm run test",
@@ -27,9 +27,9 @@
     "@types/node": "^12.7.5",
     "app-root-path": "^2.2.1",
     "ava": "^2.4.0",
+    "aws-sdk": "^2.544.0",
     "axios": "^0.19.0",
     "c8": "^5.0.4",
-    "cheerio": "^1.0.0-rc.3",
     "currency-formatter": "^1.5.5",
     "dotenv": "^8.1.0",
     "esm": "^3.2.25",
@@ -37,8 +37,8 @@
     "module-alias": "^2.2.1",
     "moment-timezone": "^0.5.26",
     "morgan": "^1.9.1",
-    "nightmare": "^3.0.2",
     "typescript": "^3.6.3",
+    "uuid": "^3.3.3",
     "winston": "^3.2.1"
   },
   "_moduleAliases": {

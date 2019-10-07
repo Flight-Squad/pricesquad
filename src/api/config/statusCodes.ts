@@ -1,6 +1,7 @@
 const StatusCodes = Object.freeze({
   Get: {
     success: 200,
+    NoContent: 204,
   },
   Post: {
     success: 201,
@@ -9,7 +10,9 @@ const StatusCodes = Object.freeze({
     Client:{
       BadRequest: 400,
     },
-    Server: {},
+    Server: {
+      NotImplemented: 501,
+    },
   }
 })
 
