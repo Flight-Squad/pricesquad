@@ -1,3 +1,5 @@
+var moment = require('moment');
+
 export interface IPriceRequestQuery {
   origin: string;
   dest: string;
@@ -15,8 +17,17 @@ export async function validatePriceRequestQueryParams(params: IPriceRequestQuery
   }
 
   if (!params.departDate) throw new Error('No depart Date provided');
+
+  const departDate = moment(params.departDate);
+  if (!departDate.isValid()) throw new Error('Invalid depart Date provided');
+
   if (params.isRoundTrip) {
-    if (!params.returnDate) throw new Error('No return date provided (trip is a round trip)')
+    if (!params.returnDate) throw new Error('No return date provided (trip is a round trip)');
+
+    const returnDate = moment(params.returnDate);
+    if (!returnDate.isValid()) throw new Error('Invalid return Date provided');
+
+    if (returnDate.isSameOrBefore(departDate)) throw new Error('Return date is not after departure date (round trip)');
   }
 }
 
