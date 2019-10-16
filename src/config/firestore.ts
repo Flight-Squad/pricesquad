@@ -13,9 +13,9 @@ const serviceAccount = JSON.stringify({
   "client_x509_cert_url": process.env.FS_CLIENT_CERT_URL,
 });
 
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount)
-});
+process.env.FIREBASE_CONFIG = serviceAccount;
+
+admin.initializeApp();
 
 export const db = admin.firestore();
 
