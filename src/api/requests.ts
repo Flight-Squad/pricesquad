@@ -11,3 +11,5 @@ requestsRouter.post('/tripRequest', (req, res) => {
 
   db.collection('trip_requests').doc(req.body.requestId).set(docData, {merge: true});
 });
+
+export default requestsRouter;

@@ -6,6 +6,7 @@ import winston, { LoggerStream } from 'config/winston';
 import routes from './config/routeDefinitions';
 import StatusCodes from './config/statusCodes';
 import priceRouter from './prices';
+import requestsRouter from './requests';
 
 var app = express();
 
@@ -16,6 +17,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // extended flag enables nested objects
 
 app.use('/', priceRouter);
+app.use('/', requestsRouter);
 
 const port = process.env.PORT || 3000;
 app.get('/', (req, res) => {
