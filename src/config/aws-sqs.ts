@@ -15,6 +15,8 @@ const uuidv4 = require('uuid/v4'); // To generate request id's
  * @param data Adds JSON-stringified message based on `data` to SQS queue
  */
 export async function sendSQSMessage(data) {
+  // We're adding uuid to the data payload to remain platform agnostic
+  // This way, we're not dependent on any one cloud provider's API
   const id = uuidv4();
   data.requestId = id;
   const searchParams = data;

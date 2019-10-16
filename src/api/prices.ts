@@ -1,8 +1,8 @@
+import { sendSQSMessage } from "config/aws-sqs";
+import logger from "config/winston";
+import { validatePriceRequestQueryParams } from "data/models/flightSearchParams";
 import { Router } from "express";
 import StatusCodes from "./config/statusCodes";
-import { validatePriceRequestQueryParams } from "data/models/flightSearchParams";
-import logger from "config/winston";
-import { sendSQSMessage } from "config/aws-sqs";
 
 const priceRouter = Router();
 
