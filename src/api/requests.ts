@@ -4,12 +4,13 @@ import { db } from "config/firestore";
 
 const requestsRouter = Router();
 
-requestsRouter.post('/tripRequest', (req, res) => {
+requestsRouter.post('/tripRequest', async (req, res) => {
   const docData = {
     [req.body.provider]: req.body.results,
   };
 
-  db.collection('trip_requests').doc(req.body.requestId).set(docData, {merge: true});
+  await db.collection('trip_requests').doc(req.body.requestId).set(docData, {merge: true});
+  res.status(StatusCodes.Post.success).send();
 });
 
 export default requestsRouter;
