@@ -21,6 +21,7 @@ const paramValidation = async function (req, res, next) {
   // req.validatedParams = params;
   if (!err) next();
 }
+//
 
 priceRouter.post('/prices', paramValidation, async (req, res) => {
   const processStartTime = process.hrtime();
