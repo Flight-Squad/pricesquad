@@ -1,5 +1,5 @@
 import { sendSQSMessage } from "config/aws-sqs";
-import logger from "config/winston";
+import logger from "config/logger";
 import { validatePriceRequestQueryParams } from "data/models/flightSearchParams";
 import { Router } from "express";
 import StatusCodes from "./config/statusCodes";

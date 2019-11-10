@@ -1,6 +1,6 @@
 const AWS = require("aws-sdk");
 import * as AwsConfig from "config/aws";
-import logger from "./winston";
+import logger from "./logger";
 import { SearchProviders } from "data/models/flightSearch/providers";
 
 AWS.config.update({ region: AwsConfig.Region });
