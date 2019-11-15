@@ -5,8 +5,9 @@ import appRoot from 'app-root-path'
 import routes from './config/routeDefinitions';
 import StatusCodes from './config/statusCodes';
 import priceRouter from './prices';
-import requestsRouter from './requests';
+
 import logger  from 'config/logger';
+import requestsRouter from './tripRequests';
 
 var app = express();
 
