@@ -1,12 +1,13 @@
 import admin from 'firebase-admin';
 import path from 'path';
+import logger from './logger';
 const fs = require('fs');
 
 const creds = process.env.FS_CONFIG;
 
 // write to a new file named 2pac.txt
 fs.writeFileSync(path.resolve(__dirname, './serviceAccount.json'), creds);
-console.log('Firestore Service Account saved!');
+logger.info('Firestore Service Account saved!');
 
 // process.env.FIREBASE_CONFIG = ;
 
