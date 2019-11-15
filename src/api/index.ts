@@ -6,7 +6,7 @@ import winston, { LoggerStream } from 'config/winston';
 import routes from './config/routeDefinitions';
 import StatusCodes from './config/statusCodes';
 import priceRouter from './prices';
-import requestsRouter from './requests';
+import requestsRouter from './tripRequests';
 
 var app = express();
 
