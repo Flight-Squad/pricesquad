@@ -34,13 +34,13 @@ priceRouter.post("/prices", paramValidation, async (req, res) => {
     .send(JSON.stringify({ id: requestId, processTime: endTime }));
 });
 
-priceRouter.get("/prices/:id", async (req, res) => {
+priceRouter.get("/prices/:sessionId/:reqId", async (req, res) => {
   const processStartTime = process.hrtime();
-  const {id} = req.params;
-  logger.info('Get Prices -- Doc ID', {id});
+  const {sessionId, reqId} = req.params;
+  logger.info('Get Prices -- Doc ID', {sessionId, reqId});
   const snapshot = await db
     .collection("trip_requests")
-    .doc(id)
+    .doc(`${sessionId}#${reqId}`)
     .get();
   const data = snapshot.data();
 
