@@ -8,7 +8,7 @@ import { SearchProviders } from "data/models/flightSearch/providers";
 
 const priceRouter = Router();
 
-const paramValidation = async function(req, res, next) {
+const paramValidation = async function (req, res, next) {
   const processStartTime = process.hrtime();
   const params = req.body;
   let err: any = false; // falsy value
@@ -25,8 +25,8 @@ const paramValidation = async function(req, res, next) {
 
 priceRouter.post("/prices", paramValidation, async (req, res) => {
   const processStartTime = process.hrtime();
-  const params = req.body;
-  const requestId = await sendSQSMessage(params);
+  const { sessionId, ...params } = req.body;
+  const requestId = await sendSQSMessage(params, sessionId);
   const endTime = process.hrtime(processStartTime);
   logger.info(`ProcessTime=${endTime[0]}.${endTime[1]}`);
   res
