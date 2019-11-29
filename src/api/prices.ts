@@ -37,7 +37,7 @@ priceRouter.post("/prices", paramValidation, async (req, res) => {
 priceRouter.get("/prices/:sessionId/:reqId", async (req, res) => {
   const processStartTime = process.hrtime();
   const {sessionId, reqId} = req.params;
-  logger.info('Get Prices -- Doc ID', {sessionId, reqId});
+
   const snapshot = await db
     .collection("trip_requests")
     .doc(`${sessionId}#${reqId}`)
@@ -50,7 +50,7 @@ priceRouter.get("/prices/:sessionId/:reqId", async (req, res) => {
   const requestIsSatisfied = providerKeys.every(key => dataKeys.includes(key));
 
   const endTime = process.hrtime(processStartTime);
-  logger.info(`ProcessTime=${endTime[0]}.${endTime[1]}`);
+  logger.info(`GET prices`, {procTime: `${endTime[0]}.${endTime[1]}`});
 
   if (requestIsSatisfied) {
     res.status(StatusCodes.Get.success).send(JSON.stringify({ res: data }));
