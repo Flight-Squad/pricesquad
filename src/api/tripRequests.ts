@@ -9,7 +9,7 @@ requestsRouter.post('/tripRequest', async (req, res) => {
     [req.body.provider]: req.body.results,
   };
 
-  await db.collection('trip_requests').doc(req.body.requestId).set(docData, {merge: true});
+  await db.collection('trip_requests').doc(`${req.body.sessionId}#${req.body.requestId}`).set(docData, {merge: true});
   res.status(StatusCodes.Post.success).send();
 });
 
