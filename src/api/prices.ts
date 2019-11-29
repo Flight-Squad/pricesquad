@@ -36,9 +36,11 @@ priceRouter.post("/prices", paramValidation, async (req, res) => {
 
 priceRouter.get("/prices/:id", async (req, res) => {
   const processStartTime = process.hrtime();
+  const {id} = req.params;
+  logger.info('Get Prices -- Doc ID', {id});
   const snapshot = await db
     .collection("trip_requests")
-    .doc(req.params.id)
+    .doc(id)
     .get();
   const data = snapshot.data();
 
