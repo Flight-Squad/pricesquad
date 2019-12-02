@@ -1,28 +1,26 @@
+import StatusCodes from "api/config/statusCodes";
 import { sendSQSMessage } from "config/aws-sqs";
-import logger from "config/logger";
-import { validatePriceRequestQueryParams } from "data/models/flightSearchParams";
-import { Router } from "express";
-import StatusCodes from "./config/statusCodes";
 import { db } from "config/firestore";
+import logger from "config/logger";
 import { SearchProviders } from "data/models/flightSearch/providers";
+import { Router } from "express";
+import { paramValidation } from "./paramValidation";
 
 const priceRouter = Router();
 
-const paramValidation = async function (req, res, next) {
-  const processStartTime = process.hrtime();
-  const params = req.body;
-  let err: any = false; // falsy value
-  await validatePriceRequestQueryParams(params).catch(e => {
-    logger.error(e.message);
-    err = e;
-    res.status(StatusCodes.Error.Client.BadRequest).send("Bad Request");
-  });
-  const endTime = process.hrtime(processStartTime);
-  logger.info(`ValidationTime=${endTime[0]}.${endTime[1]}`);
-  // req.validatedParams = params;
-  if (!err) next();
-};
+/**
+ * See IFlightSearchParams
+ 
+ req.body: 
 
+  origin: string;
+  dest: string;
+  departDate: Date;
+  returnDate?: Date;
+  isRoundTrip: boolean;
+  numStops: FlightStops;
+
+ */
 priceRouter.post("/prices", paramValidation, async (req, res) => {
   const processStartTime = process.hrtime();
   const { sessionId, ...params } = req.body;
@@ -34,9 +32,30 @@ priceRouter.post("/prices", paramValidation, async (req, res) => {
     .send(JSON.stringify({ id: requestId, processTime: endTime }));
 });
 
+/**
+ * Makes a batch request for a combination of parameters
+ * origins are interchangable
+ * destinations are interchangeable
+ * date arrays are included for future flexibility
+ * 
+ * Number of requests: N(origins)*N(destinations)*N(departDates)*N(returnDates)
+ * 
+ * IF both origin and dest are IATA, add batch for each date
+ * 
+ 
+req.body: 
+
+  origins: Array<string>;
+  destinations: Array<string>;
+  departDates: Array<Date>;
+  returnDates?: Array<Date>;
+  isRoundTrip: boolean;
+  numStops: FlightStops;
+ */
+
 priceRouter.get("/prices/:sessionId/:reqId", async (req, res) => {
   const processStartTime = process.hrtime();
-  const {sessionId, reqId} = req.params;
+  const { sessionId, reqId } = req.params;
 
   const snapshot = await db
     .collection("trip_requests")
@@ -50,7 +69,7 @@ priceRouter.get("/prices/:sessionId/:reqId", async (req, res) => {
   const requestIsSatisfied = providerKeys.every(key => dataKeys.includes(key));
 
   const endTime = process.hrtime(processStartTime);
-  logger.info(`GET prices`, {procTime: `${endTime[0]}.${endTime[1]}`});
+  logger.info(`GET prices`, { procTime: `${endTime[0]}.${endTime[1]}` });
 
   if (requestIsSatisfied) {
     res.status(StatusCodes.Get.success).send(JSON.stringify({ res: data }));
