@@ -48,10 +48,39 @@ req.body:
   origins: Array<string>;
   destinations: Array<string>;
   departDates: Array<Date>;
-  returnDates?: Array<Date>;
+  returnDates: Array<Date>;
   isRoundTrip: boolean;
   numStops: FlightStops;
  */
+priceRouter.post('/prices/batch/round-trip', async (req, res) => {
+  const processStartTime = process.hrtime();
+  const { sessionId, ...params } = req.body;
+
+  const {isRoundTrip, numStops} = params;
+  const { origins, destinations, departDates, returnDates } = params;
+  const numTrips = origins.length * destinations.length * departDates.length * returnDates.length;
+  const reqId = require('uuid/v4')();
+
+  for (const origin of origins) {
+    for (const dest of destinations) {
+      for (const departDate of departDates) {
+        for (const returnDate of returnDates) {
+          const data = {
+            origin,
+            dest,
+            departDate,
+            returnDate,
+            isRoundTrip,
+            numStops,
+          };
+          // create db entry with numTrips
+          await sendSQSMessage(data, sessionId, reqId);
+        }
+      }
+    }
+  }
+
+})
 
 priceRouter.get("/prices/:sessionId/:reqId", async (req, res) => {
   const processStartTime = process.hrtime();
