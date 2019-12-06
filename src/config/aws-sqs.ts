@@ -50,3 +50,47 @@ export async function sendSQSMessage(data, sessionId, reqId?: string): Promise<s
 
   return requestId;
 }
+
+/**
+ *
+ * @param trips `Array` of trip request objects
+ * @param sessionId `string` -- chat or interaction id
+ * @param docPath `string` -- id of firestore document, eg `<collection>/<document>
+ * @param searchProviders `Object` or `enum` -- providers to search/scrape from
+ */
+export async function enqueueBatch(trips: Array<any>, sessionId: string, docPath: string, searchProviders): Promise<void> {
+  // const searchParams = data;
+  const params = {
+    Entries: [],
+    QueueUrl: AwsConfig.QueueUrl,
+  };
+
+  for (const trip of trips) {
+    const tripId = uuidv4();
+
+    for (const provider of Object.keys(searchProviders)) {
+      params.Entries.push({
+        Id: uuidv4(),
+        MessageBody: JSON.stringify({
+          params: trip,
+          provider: searchProviders[provider],
+          sessionId,
+          tripId,
+          docPath,
+        }),
+      });
+    }
+  }
+
+  await sqs.sendMessageBatch(params, (err, res) => {
+    if (err) {
+      logger.error(err);
+    } else {
+      if (res.Failed.length > 0) {
+        // TODO implement retry mechanism
+        logger.error(`Failed ${res.Failed.length} requests`);
+      }
+      logger.info(`Successfully added ${res.Successful.length} messages`);
+    }
+  });
+}

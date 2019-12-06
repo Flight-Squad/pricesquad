@@ -1,17 +1,18 @@
 import StatusCodes from "api/config/statusCodes";
-import { sendSQSMessage } from "config/aws-sqs";
+import { sendSQSMessage, enqueueBatch } from "config/aws-sqs";
 import { db } from "config/firestore";
 import logger from "config/logger";
 import { SearchProviders } from "data/models/flightSearch/providers";
 import { Router } from "express";
 import { paramValidation } from "./paramValidation";
+import { createTripRequests, createDbEntry } from "./batch/round-trip";
 
 const priceRouter = Router();
 
 /**
  * See IFlightSearchParams
- 
- req.body: 
+
+ req.body:
 
   origin: string;
   dest: string;
@@ -24,6 +25,7 @@ const priceRouter = Router();
 priceRouter.post("/prices", paramValidation, async (req, res) => {
   const processStartTime = process.hrtime();
   const { sessionId, ...params } = req.body;
+
   const requestId = await sendSQSMessage(params, sessionId);
   const endTime = process.hrtime(processStartTime);
   logger.info(`ProcessTime=${endTime[0]}.${endTime[1]}`);
@@ -37,13 +39,14 @@ priceRouter.post("/prices", paramValidation, async (req, res) => {
  * origins are interchangable
  * destinations are interchangeable
  * date arrays are included for future flexibility
- * 
+ * ! Returns id for firestore doc (with collection) -> collection/document`
+ *
  * Number of requests: N(origins)*N(destinations)*N(departDates)*N(returnDates)
- * 
+ *
  * IF both origin and dest are IATA, add batch for each date
- * 
- 
-req.body: 
+ *
+
+req.body:
 
   origins: Array<string>;
   destinations: Array<string>;
@@ -52,34 +55,21 @@ req.body:
   isRoundTrip: boolean;
   numStops: FlightStops;
  */
-priceRouter.post('/prices/batch/round-trip', async (req, res) => {
+priceRouter.post('/prices/batch', async (req, res) => {
   const processStartTime = process.hrtime();
   const { sessionId, ...params } = req.body;
 
-  const {isRoundTrip, numStops} = params;
-  const { origins, destinations, departDates, returnDates } = params;
-  const numTrips = origins.length * destinations.length * departDates.length * returnDates.length;
-  const reqId = require('uuid/v4')();
+  // Create a req for each combination of parameters
+  const tripRequests = await createTripRequests(params);
+  const docPath = await createDbEntry(sessionId, tripRequests.length, req.body);
 
-  for (const origin of origins) {
-    for (const dest of destinations) {
-      for (const departDate of departDates) {
-        for (const returnDate of returnDates) {
-          const data = {
-            origin,
-            dest,
-            departDate,
-            returnDate,
-            isRoundTrip,
-            numStops,
-          };
-          // create db entry with numTrips
-          await sendSQSMessage(data, sessionId, reqId);
-        }
-      }
-    }
-  }
+  // Use search providers defined in src/data/models/flightSearch/providers
+  await enqueueBatch(tripRequests, sessionId, docPath, SearchProviders);
 
+  const endTime = process.hrtime(processStartTime);
+  logger.info('/prices/batch', {ProcessTime: `${endTime[0]}.${endTime[1]}`});
+
+  res.status(StatusCodes.Post.success).send(JSON.stringify({ id: docPath }));
 })
 
 priceRouter.get("/prices/:sessionId/:reqId", async (req, res) => {

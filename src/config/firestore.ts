@@ -22,4 +22,6 @@ admin.initializeApp({
 
 export const db = admin.firestore();
 
-async function initDb() {}
+export const Collections = {
+  tripRequests: 'trip_requests',
+};
