@@ -77,7 +77,7 @@ priceRouter.get("/prices/:collection/:doc", async (req, res) => {
   const { collection, doc } = req.params;
 
   const snapshot = await db.collection(collection).doc(doc).get();
-  logger.info('Snapshot exists', {exists: snapshot.exists});
+  logger.info('Snapshot exists', {exists: snapshot.exists, collection, doc});
 
   const data = snapshot.data();
   logger.info('Debug TripRequests Data', data);
