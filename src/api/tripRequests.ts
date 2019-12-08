@@ -13,6 +13,8 @@ requestsRouter.post('/tripRequest', async (req, res) => {
   const snapshot = await db.doc(docPath).get();
   const docData = snapshot.data();
 
+  // Initialize trip if no other providers have been added
+  docData[tripId] = docData[tripId] || {};
   docData[tripId][provider] = results;
 
   const dataKeys = Object.keys(docData[tripId]);
