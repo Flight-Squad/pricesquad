@@ -34,6 +34,8 @@ priceRouter.post("/prices", paramValidation, async (req, res) => {
     .send(JSON.stringify({ id: requestId, processTime: endTime }));
 });
 
+const compare = (a, b) => a.price - b.price;
+
 /**
  * Makes a batch request for a combination of parameters
  * origins are interchangable
@@ -87,13 +89,13 @@ priceRouter.get("/prices/:collection/:doc", async (req, res) => {
     reqPrices.push(tripPrices[0]);
   }
 
-  reqPrices.sort();
+  reqPrices.sort(compare);
 
   const endTime = process.hrtime(processStartTime);
   logger.info(`GET prices`, { procTime: `${endTime[0]}.${endTime[1]}`, collection, doc });
 
   if (data) {
-    res.status(StatusCodes.Get.success).send(JSON.stringify({ prices: reqPrices }));
+    res.status(StatusCodes.Get.success).send(JSON.stringify({ res: reqPrices }));
   } else {
     res.status(StatusCodes.Get.NoContent).send();
   }
@@ -103,10 +105,10 @@ async function getBestTripPrices(trip) {
   const prices = []; // best price from each provider => length is numProviders
   for (const [provider, value] of Object.entries(trip)) {
     // sort prices from each quote from the search provider
-    const provPrices = trip[provider].data.map(quote => quote.price).sort();
+    const provPrices = trip[provider].data.sort(compare);
     prices.push(provPrices[0]);
   }
-  return prices.sort();
+  return prices.sort(compare);
 }
 
 export default priceRouter;
