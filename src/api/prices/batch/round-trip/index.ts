@@ -55,7 +55,7 @@ interface IBatchTripReqParams {
 export async function createDbEntry(sessionId: string, numTrips: number, origQuery: any) : Promise<string> {
   // ## Create Document path
   const reqId = await uuidv4();
-  const docId = `${sessionId}#${reqId}`;
+  const docId = `${sessionId}~${reqId}`;
   const docPath = `${Collections.tripRequests}/${docId}`;
 
   const queryStartTime = new Date(); // date-string -> so we know how long it takes to process
