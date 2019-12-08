@@ -22,6 +22,7 @@ requestsRouter.post('/tripRequest', async (req, res) => {
   const tripIsDone = providerKeys.every(key => dataKeys.includes(key));
   if (tripIsDone) {
     docData.tripIds.push(tripId);
+    docData.query.endTime = new Date();
   }
 
   await db.doc(docPath).set(docData, { merge: true });

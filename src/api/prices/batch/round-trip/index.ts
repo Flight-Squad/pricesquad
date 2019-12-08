@@ -58,15 +58,15 @@ export async function createDbEntry(sessionId: string, numTrips: number, origQue
   const docId = `${sessionId}~${reqId}`;
   const docPath = `${Collections.tripRequests}/${docId}`;
 
-  const queryStartTime = new Date(); // date-string -> so we know how long it takes to process
-
   const initData = {
     numTrips,
-    queryStartTime,
     tripIds: [],
     query: origQuery,
     // ...trips -> [tripId]: Object -> {  [provider]: searchResults  }
   }
+
+  // timestamp to determine how long each query takes
+  initData.query.startTime = new Date();
 
   await db.doc(docPath).set(initData, { merge: true });
   return docPath;
