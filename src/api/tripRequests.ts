@@ -6,7 +6,7 @@ import { SearchProviders } from "data/models/flightSearch/providers";
 import logger from "config/logger";
 
 const requestsRouter = Router();
-// how do we get docPath originally?
+
 requestsRouter.post('/tripRequest', async (req, res) => {
   const { results, provider, tripId, sessionId, docPath } = req.body;
 

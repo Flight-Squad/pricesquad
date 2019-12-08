@@ -67,34 +67,45 @@ priceRouter.post('/prices/batch', async (req, res) => {
   await enqueueBatch(tripRequests, sessionId, docPath, SearchProviders);
 
   const endTime = process.hrtime(processStartTime);
-  logger.info('/prices/batch', {ProcessTime: `${endTime[0]}.${endTime[1]}`});
+  logger.info('/prices/batch', { ProcessTime: `${endTime[0]}.${endTime[1]}` });
 
   res.status(StatusCodes.Post.success).send(JSON.stringify({ id: docPath }));
 })
 
-priceRouter.get("/prices/:sessionId/:reqId", async (req, res) => {
+priceRouter.get("/prices/:collection/:doc", async (req, res) => {
   const processStartTime = process.hrtime();
-  const { sessionId, reqId } = req.params;
+  const { collection, doc } = req.params;
 
-  const snapshot = await db
-    .collection("trip_requests")
-    .doc(`${sessionId}#${reqId}`)
-    .get();
+  const snapshot = await db.collection(collection).doc(doc).get();
   const data = snapshot.data();
 
-  // ensure all provider keys are in data object
-  const dataKeys = Object.keys(data);
-  const providerKeys = Object.keys(SearchProviders);
-  const requestIsSatisfied = providerKeys.every(key => dataKeys.includes(key));
+  const { tripIds } = data;
+  const reqPrices = []; // best price from each trip => length is numTrips
+  for (const tripId of tripIds) {
+    const tripPrices = await getBestTripPrices(data[tripId]);
+    reqPrices.push(tripPrices[0]);
+  }
+
+  reqPrices.sort();
 
   const endTime = process.hrtime(processStartTime);
   logger.info(`GET prices`, { procTime: `${endTime[0]}.${endTime[1]}` });
 
-  if (requestIsSatisfied) {
-    res.status(StatusCodes.Get.success).send(JSON.stringify({ res: data }));
+  if (data) {
+    res.status(StatusCodes.Get.success).send(JSON.stringify({ prices: reqPrices }));
   } else {
     res.status(StatusCodes.Get.NoContent).send();
   }
 });
+
+async function getBestTripPrices(trip) {
+  const prices = []; // best price from each provider => length is numProviders
+  for (const [provider, value] of Object.entries(trip)) {
+    // sort prices from each quote from the search provider
+    const provPrices = trip[provider].data.map(quote => quote.price).sort();
+    prices.push(provPrices[0]);
+  }
+  return prices.sort();
+}
 
 export default priceRouter;
