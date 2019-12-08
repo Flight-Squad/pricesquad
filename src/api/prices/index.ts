@@ -77,10 +77,8 @@ priceRouter.get("/prices/:collection/:doc", async (req, res) => {
   const { collection, doc } = req.params;
 
   const snapshot = await db.collection(collection).doc(doc).get();
-  logger.info('Snapshot exists', {exists: snapshot.exists, collection, doc});
 
   const data = snapshot.data();
-  logger.info('Debug TripRequests Data', data);
 
   const { tripIds } = data;
   const reqPrices = []; // best price from each trip => length is numTrips
@@ -92,7 +90,7 @@ priceRouter.get("/prices/:collection/:doc", async (req, res) => {
   reqPrices.sort();
 
   const endTime = process.hrtime(processStartTime);
-  logger.info(`GET prices`, { procTime: `${endTime[0]}.${endTime[1]}` });
+  logger.info(`GET prices`, { procTime: `${endTime[0]}.${endTime[1]}`, collection, doc });
 
   if (data) {
     res.status(StatusCodes.Get.success).send(JSON.stringify({ prices: reqPrices }));
