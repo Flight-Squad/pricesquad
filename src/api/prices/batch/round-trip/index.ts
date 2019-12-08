@@ -15,6 +15,7 @@ export async function createTripRequests(params) : Promise<Array<any>> {
   for (const origin of origins) {
     for (const dest of destinations) {
       for (const departDate of departDates) {
+        // if it's a round trip, iterate over return dates too
         if (returnDates && isRoundTrip) {
           for (const returnDate of returnDates) {
             tripRequests.push({

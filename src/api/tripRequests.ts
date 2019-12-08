@@ -2,29 +2,36 @@ import { Router } from "express";
 import StatusCodes from "./config/statusCodes";
 import { db } from "config/firestore";
 import axios from 'axios';
+import { SearchProviders } from "data/models/flightSearch/providers";
+import logger from "config/logger";
 
 const requestsRouter = Router();
-
+// how do we get docPath originally?
 requestsRouter.post('/tripRequest', async (req, res) => {
-  const docData = {
-    [req.body.provider]: req.body.results,
-  };
+  const { results, provider, tripId, sessionId, docPath } = req.body;
 
-  const docId = `${req.body.sessionId}#${req.body.requestId}`;
+  const snapshot = await db.doc(docPath).get();
+  const docData = snapshot.data();
 
-  await db.collection('trip_requests').doc(docId).set(docData, {merge: true});
-  if (await triggerShowPrices(docId)) {
-    axios.post(`${process.env.CHATSQUAD_API}/sendPrices`, {
-      sessionId: req.body.sessionId,
-      requestId: req.body.requestId,
-    });
+  docData[tripId][provider] = results;
+
+  const dataKeys = Object.keys(docData[tripId]);
+  const providerKeys = Object.keys(SearchProviders);
+  const tripIsDone = providerKeys.every(key => dataKeys.includes(key));
+  if (tripIsDone) {
+    docData.tripIds.push(tripId);
   }
+
+  await db.doc(docPath).set(docData, { merge: true });
+
+  const reqIsDone = docData.numTrips === docData.tripIds.length;
+  if (reqIsDone) {
+    // no `await` because no error/response checking is implemented rn
+    axios.post(`${process.env.CHATSQUAD_API}/sendPrices`, { sessionId });
+  }
+
+  logger.info('Trip Request', { results, provider, tripId, sessionId, docPath, tripIsDone, reqIsDone });
   res.status(StatusCodes.Post.success).send();
 });
-
-async function triggerShowPrices(docId) {
-  // Check if all data is present
-  return true;
-}
 
 export default requestsRouter;
