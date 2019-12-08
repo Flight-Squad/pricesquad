@@ -32,7 +32,7 @@ requestsRouter.post('/tripRequest', async (req, res) => {
     axios.post(`${process.env.CHATSQUAD_API}/sendPrices`, { sessionId });
   }
 
-  logger.info('Trip Request', { results, provider, tripId, sessionId, docPath, tripIsDone, reqIsDone });
+  logger.info('Trip Request', { provider, tripId, sessionId, docPath, tripIsDone, reqIsDone });
   res.status(StatusCodes.Post.success).send();
 });
 
