@@ -22,7 +22,7 @@ const priceRouter = Router();
   numStops: FlightStops;
 
  */
-priceRouter.post("/prices", paramValidation, async (req, res) => {
+priceRouter.post("/", paramValidation, async (req, res) => {
   const processStartTime = process.hrtime();
   const { sessionId, ...params } = req.body;
 
@@ -57,7 +57,7 @@ req.body:
   isRoundTrip: boolean;
   numStops: FlightStops;
  */
-priceRouter.post('/prices/batch', async (req, res) => {
+priceRouter.post('/batch', async (req, res) => {
   const processStartTime = process.hrtime();
   const { sessionId, ...params } = req.body;
 
@@ -74,7 +74,7 @@ priceRouter.post('/prices/batch', async (req, res) => {
   res.status(StatusCodes.Post.success).send(JSON.stringify({ id: docPath }));
 })
 
-priceRouter.get("/prices/:collection/:doc", async (req, res) => {
+priceRouter.get("/:collection/:doc", async (req, res) => {
   const processStartTime = process.hrtime();
   const { collection, doc } = req.params;
 

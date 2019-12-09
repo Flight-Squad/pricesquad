@@ -18,7 +18,7 @@ var app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // extended flag enables nested objects
 
-app.use('/', priceRouter);
+app.use('/prices', priceRouter);
 app.use('/', requestsRouter);
 
 const port = process.env.PORT || 3000;
