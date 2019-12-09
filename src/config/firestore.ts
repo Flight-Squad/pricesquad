@@ -17,7 +17,8 @@ const serviceAccount = require('./serviceAccount.json');
 // const serviceAccount = require(path.resolve(__dirname, 'firestore.json'));
 
 admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount)
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: process.env.FIREBASE_URL,
 });
 
 export const db = admin.firestore();
