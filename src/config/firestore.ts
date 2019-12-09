@@ -21,7 +21,13 @@ admin.initializeApp({
 });
 
 export const db = admin.firestore();
+export const firebase = admin.database();
 
 export const Collections = {
   tripRequests: 'trip_requests',
+};
+
+export const AirportLocDoc = {
+  id: process.env.AIRPORT_LOC_DOC,
+  sheetName: process.env.SHEET_NAME,
 };

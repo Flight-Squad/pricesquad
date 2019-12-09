@@ -8,6 +8,7 @@ import priceRouter from './prices';
 
 import logger  from 'config/logger';
 import requestsRouter from './tripRequests';
+import airportRouter from './airport';
 
 var app = express();
 
@@ -20,6 +21,7 @@ app.use(express.urlencoded({ extended: true })); // extended flag enables nested
 
 app.use('/prices', priceRouter);
 app.use('/', requestsRouter);
+app.use('/airports', airportRouter);
 
 const port = process.env.PORT || 3000;
 app.get('/', (req, res) => {
