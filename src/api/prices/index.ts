@@ -6,6 +6,7 @@ import { SearchProviders } from "data/models/flightSearch/providers";
 import { Router } from "express";
 import { paramValidation } from "./paramValidation";
 import { createTripRequests, createDbEntry } from "./batch/round-trip";
+import { getBestPrices } from "./getBestPrices";
 
 const priceRouter = Router();
 
@@ -33,8 +34,6 @@ priceRouter.post("/", paramValidation, async (req, res) => {
     .status(StatusCodes.Post.success)
     .send(JSON.stringify({ id: requestId, processTime: endTime }));
 });
-
-const compare = (a, b) => a.price - b.price;
 
 /**
  * Makes a batch request for a combination of parameters
@@ -81,34 +80,14 @@ priceRouter.get("/:collection/:doc", async (req, res) => {
   const snapshot = await db.collection(collection).doc(doc).get();
 
   const data = snapshot.data();
+  if (!data) res.status(StatusCodes.Get.NoContent).send();
 
-  const { tripIds } = data;
-  const reqPrices = []; // best price from each trip => length is numTrips
-  for (const tripId of tripIds) {
-    const tripPrices = await getBestTripPrices(data[tripId]);
-    reqPrices.push(tripPrices[0]);
-  }
-
-  reqPrices.sort(compare);
+  const reqPrices = await getBestPrices(data);
 
   const endTime = process.hrtime(processStartTime);
   logger.info(`GET prices`, { procTime: `${endTime[0]}.${endTime[1]}`, collection, doc });
 
-  if (data) {
-    res.status(StatusCodes.Get.success).send(JSON.stringify({ res: reqPrices }));
-  } else {
-    res.status(StatusCodes.Get.NoContent).send();
-  }
+  res.status(StatusCodes.Get.success).send(JSON.stringify({ res: reqPrices }));
 });
-
-async function getBestTripPrices(trip) {
-  const prices = []; // best price from each provider => length is numProviders
-  for (const [provider, value] of Object.entries(trip)) {
-    // sort prices from each quote from the search provider
-    const provPrices = trip[provider].data.sort(compare);
-    prices.push(provPrices[0]);
-  }
-  return prices.sort(compare);
-}
 
 export default priceRouter;
