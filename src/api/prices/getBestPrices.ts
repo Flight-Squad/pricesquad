@@ -12,7 +12,7 @@ export async function getBestPrices(data) {
     reqPrices.push(tripPrices[0]);
   }
 
-  reqPrices.sort(compare);
+  return reqPrices.sort(compare);
 }
 
 async function getBestTripPrices(trip) {
