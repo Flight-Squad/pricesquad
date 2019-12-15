@@ -4,6 +4,7 @@ import { db } from "config/firestore";
 import axios from 'axios';
 import { SearchProviders } from "data/models/flightSearch/providers";
 import logger from "config/logger";
+import { getBestPrices } from "./prices/getBestPrices";
 
 const requestsRouter = Router();
 
@@ -30,7 +31,13 @@ requestsRouter.post('/tripRequest', async (req, res) => {
   const reqIsDone = docData.numTrips === docData.tripIds.length;
   if (reqIsDone) {
     // no `await` because no error/response checking is implemented rn
-    axios.post(`${process.env.CHATSQUAD_API}/sendPrices`, { sessionId });
+    const bestTrips = await getBestPrices(docData);
+    axios.post(`${process.env.CHATSQUAD_API}/send/prices`, {
+      isRoundTrip: docData.query.isRoundTrip,
+      platform: docData.query.user.platform,
+      userId: docData.query.user.id,
+      trips: bestTrips,
+    });
   }
 
   logger.info('Trip Request', { provider, tripId, sessionId, docPath, tripIsDone, reqIsDone });
