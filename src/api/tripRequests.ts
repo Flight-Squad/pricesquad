@@ -38,10 +38,8 @@ requestsRouter.post('/tripRequest', async (req, res) => {
     const ourPrice = calculateTemplatePrice(bestTrips[0].price);
     logger.info('Our Price', { ourPrice })
 
-    const { platform, id } = docData.query.user;
-
     const paymentDetailsRes = await axios.post(`${Squads.Payment}/payment`, {
-      user: { platform, id },
+      user: docData.query.user,
       amount: ourPrice,
       tripId: tripDoc.id,
     });
@@ -73,7 +71,10 @@ function calculateTemplatePrice(price: number) {
 function makePaymentQueryParams(details) {
   const { id, customer } = details;
   let fName = '', lName = '', email = customer.email || '';
-  if (customer.name) {
+  if (customer.firstName && customer.lastName) {
+    fName = customer.firstName;
+    lName = customer.lastName;
+  } else if (customer.name) {
     const nameArray = customer.split(' ');
     fName = nameArray[0];
     lName = nameArray[nameArray.length - 1];
