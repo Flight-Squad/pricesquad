@@ -47,7 +47,7 @@ requestsRouter.post('/tripRequest', async (req, res) => {
     const paymentDetails = paymentDetailsRes.data;
     const paymentUrl = `${Squads.Flightsquad}/checkout${makePaymentQueryParams(paymentDetails)}`
 
-    axios.post(`${process.env.CHATSQUAD_API}/send/prices`, {
+    axios.post(`${Squads.Chatsquad}/send/prices`, {
       isRoundTrip: docData.query.isRoundTrip,
       platform: docData.query.user.platform,
       userId: docData.query.user.id,
