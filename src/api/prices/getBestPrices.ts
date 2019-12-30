@@ -9,6 +9,8 @@ export async function getBestPrices(data) {
   const reqPrices = []; // best price from each trip => length is numTrips
   for (const tripId of tripIds) {
     const tripPrices = await getBestTripPrices(data[tripId]);
+    // Add trip Id to trip
+    Object.assign(tripPrices[0], { id: tripId });
     reqPrices.push(tripPrices[0]);
   }
 

@@ -6,17 +6,19 @@ import { SearchProviders } from "data/models/flightSearch/providers";
 import logger from "config/logger";
 import { getBestPrices } from "./prices/getBestPrices";
 import { Squads } from "config/flightsquad";
+import moment from 'moment-timezone';
 
 const requestsRouter = Router();
 
 requestsRouter.post('/tripRequest', async (req, res) => {
-  const { results, provider, tripId, sessionId, docPath } = req.body;
+  const { results, provider, tripId, sessionId, docPath, tripQuery } = req.body;
 
   const snapshot = await db.doc(docPath).get();
   const docData = snapshot.data();
 
   // Initialize trip if no other providers have been added
   docData[tripId] = docData[tripId] || {};
+  docData[tripId]['query'] = docData[tripId]['query'] || tripQuery;
   docData[tripId][provider] = results;
 
   const dataKeys = Object.keys(docData[tripId]);
@@ -33,15 +35,19 @@ requestsRouter.post('/tripRequest', async (req, res) => {
 
   const reqIsDone = docData.numTrips === docData.tripIds.length;
   if (reqIsDone) {
-    // no `await` because no error/response checking is implemented rn
     const bestTrips = await getBestPrices(docData);
+    const bestTrip = bestTrips[0];
     const ourPrice = calculateTemplatePrice(bestTrips[0].price);
     logger.info('Our Price', { ourPrice })
+
+    const tripInfo = await makeTripInfo(bestTrip, docData[bestTrip.id].query);
 
     const paymentDetailsRes = await axios.post(`${Squads.Payment}/payment`, {
       user: docData.query.user,
       amount: ourPrice,
       tripId: tripDoc.id,
+      tripInfo,
+      // origin, dest, duration, flight number, airline, dates, arrival and depart times
     });
     const paymentDetails = paymentDetailsRes.data;
     const paymentUrl = `${Squads.Flightsquad}/checkout${makePaymentQueryParams(paymentDetails)}`
@@ -80,6 +86,29 @@ function makePaymentQueryParams(details) {
     lName = nameArray[nameArray.length - 1];
   }
   return `?id=${id}&fName=${encodeURI(fName)}&lName=${encodeURI(lName)}&email=${encodeURI(email)}`;
+}
+
+async function makeTripInfo(bestTrip, query) {
+  const originAirport = (await axios.get(`${Squads.Chatsquad}/airport`, { data: { iata: query.origin } })).data;
+  const destAirport = (await axios.get(`${Squads.Chatsquad}/airport`, { data: { iata: query.dest } })).data;
+
+  const times = bestTrip.times.split('–');
+
+  function makeAirportInfo(airport, iata, time) {
+    const { city, name } = airport;
+    return { city, name, iata, time };
+  }
+
+  return {
+    date: moment(query.departDate).format("MMM DD"),
+    duration: bestTrip.duration,
+    airline: {
+      name: bestTrip.airline,
+      flightNum: '' // TODO implement
+    },
+    origin: makeAirportInfo(originAirport, query.origin, times[0]),
+    destination: makeAirportInfo(destAirport, query.dest, times[1]),
+  }
 }
 
 export default requestsRouter;
