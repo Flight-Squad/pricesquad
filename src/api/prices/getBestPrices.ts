@@ -21,9 +21,10 @@ export async function getBestPrices(data) {
 
 async function getBestTripPrices(trip) {
   const prices = []; // best price from each provider => length is numProviders
-  for (const [provider, value] of Object.entries(trip)) {
+  const providerEntries = Object.entries(trip).filter(([key]) => key !== 'query');
+  for (const [provider, value] of providerEntries) {
     // sort prices from each quote from the search provider
-    logger.info('Trip', {data: JSON.stringify(trip[provider], null, 2)});
+    logger.info('Trip', {data: JSON.stringify(trip[provider], null, 2)})
     const provPrices = trip[provider].data.sort(compare);
     prices.push(provPrices[0]);
   }
