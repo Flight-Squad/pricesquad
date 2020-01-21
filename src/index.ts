@@ -1,2 +1,3 @@
 import 'module-alias/register'; // Register absolute import paths
-import 'api/index'
+import './config/database';
+import 'api/index';

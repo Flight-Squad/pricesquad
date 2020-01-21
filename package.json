@@ -9,18 +9,15 @@
   "scripts": {
     "clean": "rm -r ./bin",
     "compile": "tsc",
-    "compile:win": "SET NODE_ENV=development&& tsc",
     "docker": "npm run start",
-    "docker:debug": "npm run start",
-    "start": "npm run compile && node -r dotenv/config ./bin/index",
-    "start:win": "npm run compile:win && node -r dotenv/config ./bin/index",
+    "docker:debug": "cross-env DEBUG=* npm run start",
+    "start": "npm run compile && node -r dotenv/config -r envkey ./bin/index",
+    "start:dev": "npm run compile && node -r dotenv/config -r envkey ./bin/index",
     "test": "npm run compile && ava",
-    "test:win": "npm run compile:win && ava",
-    "test-cover": "c8 --check-coverage --lines 100 npm run test",
-    "test-cover:win": "c8 --check-coverage --lines 100 npm run test:win"
+    "test-cover": "c8 --check-coverage --lines 100 npm run test"
   },
   "dependencies": {
-    "@flight-squad/admin": "0.0.1",
+    "@flight-squad/admin": "0.0.27",
     "@types/app-root-path": "^1.2.4",
     "@types/express": "^4.17.1",
     "@types/morgan": "^1.7.37",
@@ -33,9 +30,9 @@
     "c8": "^5.0.4",
     "currency-formatter": "^1.5.5",
     "dotenv": "^8.1.0",
+    "envkey": "^1.2.7",
     "esm": "^3.2.25",
     "express": "^4.17.1",
-    "firebase-admin": "^8.6.0",
     "heroku-logger": "^0.3.3",
     "module-alias": "^2.2.1",
     "moment-timezone": "^0.5.26",
@@ -50,6 +47,7 @@
     "tests": "./bin/tests"
   },
   "devDependencies": {
+    "cross-env": "^6.0.3",
     "ts-node": "^8.4.1"
   }
 }
