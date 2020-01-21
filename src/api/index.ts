@@ -14,7 +14,7 @@ app.use(express.urlencoded({ extended: true })); // extended flag enables nested
 app.use('/transactions', transactionsRouter);
 
 app.get('/', (req, res) => {
-    res.status(StatusCodes.Get.success).send('Hi');
+    res.status(StatusCodes.Get.success).send('OK');
 });
 
 const port = process.env.PORT || 3000;
