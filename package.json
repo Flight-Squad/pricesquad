@@ -17,7 +17,7 @@
     "test-cover": "c8 --check-coverage --lines 100 npm run test"
   },
   "dependencies": {
-    "@flight-squad/admin": "0.0.30",
+    "@flight-squad/admin": "0.0.32",
     "@types/app-root-path": "^1.2.4",
     "@types/express": "^4.17.1",
     "@types/morgan": "^1.7.37",
