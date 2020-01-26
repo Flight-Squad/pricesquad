@@ -1,8 +1,16 @@
 import { Router } from 'express';
 import { DB } from 'config/database';
-import { Transaction, Firebase, Trip, Customer, TransactionStatus, Plaid, Stripe, PaymentFields } from '@flight-squad/admin';
+import {
+    Transaction,
+    CreateTransactionFields,
+    Customer,
+    TransactionStatus,
+    Plaid,
+    Stripe,
+    PaymentFields,
+} from '@flight-squad/admin';
 import StatusCodes from './config/statusCodes';
-import { PaymentPageRoute } from 'config/flightsquad';
+import { makePaymentUrl } from 'config/flightsquad';
 import { PlaidClient, StripeClient } from 'config/payment';
 import logger from 'config/logger';
 
@@ -10,42 +18,37 @@ const transactionsRouter = Router();
 
 const toStripeAmount = (amount: number, currency: 'usd'): number => {
     switch (currency) {
-        case 'usd': return amount * 100; // to cents
+        case 'usd':
+            return amount * 100; // to cents
         default:
-            logger.warn('Currency Conversion not explicitly supported', {currency}); 
+            logger.warn('Currency Conversion not explicitly supported', { currency });
             return amount;
     }
-}
-
-const getTransaction = (txId: string) => DB.find(Transaction.Collection, txId, Transaction);
+};
 
 transactionsRouter.get('/:id', async (req, res) => {
     const { id } = req.params;
-    const transaction = await DB.find(Firebase.Collections.Transactions, id, Transaction);
-    res.send(JSON.stringify(transaction.data()));
+    const transaction = await Transaction.find(DB, id);
+    const responseData = transaction.data();
+    // To avoid exposing the original search provider of the trip to the frontend
+    const { provider, ...prunedTrip } = transaction.trip;
+    responseData.trip = prunedTrip;
+    res.send(JSON.stringify(responseData));
 });
 
-interface CreateTransactionFields {
-    /** Amount to charge in USD */
-    amount: number;
-    /** customer id */
-    customer: string;
-    trip: Trip;
-}
-
-/** 
+/**
  * Database: 1 Read, 1 Write
- * 
+ *
  * Takes `CreateTransactionFields` as request body.
- * 
+ *
  * Responds with:
- * 
+ *
  * - transaction: TransactionFields
  * - paymentUrl: url where customer can pay
  */
 transactionsRouter.post('/', async (req, res) => {
     const fields: CreateTransactionFields = req.body;
-    const customer = await DB.find(Customer.Collection, fields.customer, Customer);
+    const customer = await Customer.find(DB, fields.customer);
     let transaction = new Transaction({
         status: TransactionStatus.Created,
         customer: customer.identifiers(),
@@ -55,29 +58,31 @@ transactionsRouter.post('/', async (req, res) => {
         db: DB,
     });
     transaction = await transaction.createDoc();
-    res.status(StatusCodes.Post.success).send(JSON.stringify({
-        transaction: transaction.data(),
-        paymentUrl: `${PaymentPageRoute}?id=${transaction.id}`,
-    }));
+    res.status(StatusCodes.Post.success).send(
+        JSON.stringify({
+            transaction: transaction.data(),
+            url: makePaymentUrl(transaction.id),
+        }),
+    );
 });
 
 /**
  * Database: 1-2 reads (2 if new customer), 0-1 writes (1 if new customer)
  */
 transactionsRouter.post('/bank/pay', async (req, res) => {
-    const {publicToken, accountId, txId} = req.body;
-    const token = await Plaid.toStripe(await Plaid.getAccessToken(publicToken, PlaidClient), accountId, PlaidClient);
-    const transaction = await getTransaction(txId);
+    const { publicToken, accountId, txId } = req.body;
+    const bankToken = await Plaid.toStripe(await Plaid.getAccessToken(publicToken, PlaidClient), accountId, PlaidClient);
+    const transaction = await Transaction.find(DB, txId);
     let stripeCustomerId = transaction.customer.stripe;
     if (stripeCustomerId) {
-        await Stripe.updateDefaultSource(stripeCustomerId, token, StripeClient);
+        await Stripe.updateDefaultSource(stripeCustomerId, bankToken, StripeClient);
     } else {
-        const stripeCustomer = await Stripe.createCustomer(transaction.customer, StripeClient, {source: token});
+        const stripeCustomer = await Stripe.createCustomer(transaction.customer, StripeClient, { source: bankToken });
         stripeCustomerId = stripeCustomer.id;
 
         // Update customer with stripe customer id
-        const customer = await DB.find(Customer.Collection, transaction.customer.id, Customer);
-        await customer.updateDoc({stripe: stripeCustomerId}, Customer);
+        const customer = await Customer.find(DB, transaction.customer.id);
+        await customer.updateDoc({ stripe: stripeCustomerId }, Customer);
     }
 
     const params: PaymentFields = {
@@ -88,24 +93,27 @@ transactionsRouter.post('/bank/pay', async (req, res) => {
     const charge = await Stripe.charge(params, StripeClient);
     logger.info('Stripe Bank Charge', charge);
     res.sendStatus(StatusCodes.Post.success);
-    //create charge
 });
 
-transactionsRouter.post('/card/pay', async (req,res) => {
-    const {txId, cardToken} = req.body;
-    const tx = await getTransaction(txId);
+transactionsRouter.post('/card/pay', async (req, res) => {
+    const { txId, cardToken } = req.body;
+    const tx = await Transaction.find(DB, txId);
     let stripeCustomerId = tx.customer.stripe;
 
     if (!stripeCustomerId) {
         const stripeCustomer = await Stripe.createCustomer(tx.customer, StripeClient);
         stripeCustomerId = stripeCustomer.id;
-        const customer = await DB.find(Customer.Collection, tx.customer.id, Customer);
-        await customer.updateDoc({stripe: stripeCustomerId}, Customer);
+        // Update customer with stripe customer id
+        const customer = await Customer.find(DB, tx.customer.id);
+        await customer.updateDoc({ stripe: stripeCustomerId }, Customer);
     }
 
-    const charge = await Stripe.charge({amount: tx.amount, customer: stripeCustomerId, source: cardToken}, StripeClient);
+    const charge = await Stripe.charge(
+        { amount: tx.amount, customer: stripeCustomerId, source: cardToken },
+        StripeClient,
+    );
     logger.info('Stripe Card Charge', charge);
     res.sendStatus(StatusCodes.Post.success);
-})
+});
 
 export default transactionsRouter;
