@@ -12,12 +12,12 @@
     "docker": "npm run start",
     "docker:debug": "cross-env DEBUG=* npm run start",
     "start": "npm run compile && node -r envkey ./bin/index",
-    "start:dev": "npm run compile && node -r envkey ./bin/index",
+    "start:dev": "tsnd -r envkey -r tsconfig-paths/register -- src/index.ts",
     "test": "npm run compile && ava",
     "test-cover": "c8 --check-coverage --lines 100 npm run test"
   },
   "dependencies": {
-    "@flight-squad/admin": "0.0.48",
+    "@flight-squad/admin": "0.0.49",
     "@google-cloud/firestore": "^3.4.1",
     "@google-cloud/storage": "^4.3.0",
     "@types/app-root-path": "^1.2.4",
@@ -54,6 +54,7 @@
   "devDependencies": {
     "cross-env": "^6.0.3",
     "ts-node": "^8.4.1",
-    "ts-node-dev": "^1.0.0-pre.44"
+    "ts-node-dev": "^1.0.0-pre.44",
+    "tsconfig-paths": "^3.9.0"
   }
 }
