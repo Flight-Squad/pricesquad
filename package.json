@@ -17,7 +17,7 @@
     "test-cover": "c8 --check-coverage --lines 100 npm run test"
   },
   "dependencies": {
-    "@flight-squad/admin": "0.0.38",
+    "@flight-squad/admin": "0.0.48",
     "@google-cloud/firestore": "^3.4.1",
     "@google-cloud/storage": "^4.3.0",
     "@types/app-root-path": "^1.2.4",
