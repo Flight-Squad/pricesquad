@@ -70,8 +70,12 @@ transactionsRouter.post('/', async (req, res) => {
  * Database: 1-2 reads (2 if new customer), 0-1 writes (1 if new customer)
  */
 transactionsRouter.post('/bank/pay', async (req, res) => {
-    const { publicToken, accountId, txId } = req.body;
-    const bankToken = await Plaid.toStripe(await Plaid.getAccessToken(publicToken, PlaidClient), accountId, PlaidClient);
+    const { publicToken, accountId, txId, passengerCount } = req.body;
+    const bankToken = await Plaid.toStripe(
+        await Plaid.getAccessToken(publicToken, PlaidClient),
+        accountId,
+        PlaidClient,
+    );
     const transaction = await Transaction.find(DB, txId);
     let stripeCustomerId = transaction.customer.stripe;
     if (stripeCustomerId) {
@@ -85,18 +89,19 @@ transactionsRouter.post('/bank/pay', async (req, res) => {
         await customer.updateDoc({ stripe: stripeCustomerId }, Customer);
     }
 
-    const params: PaymentFields = {
-        amount: toStripeAmount(transaction.amount, 'usd'),
-        customer: stripeCustomerId,
-    };
-
-    const charge = await Stripe.charge(params, StripeClient);
+    const charge = await Stripe.charge(
+        {
+            amount: toStripeAmount(transaction.amount * parseInt(passengerCount), 'usd'),
+            customer: stripeCustomerId,
+        },
+        StripeClient,
+    );
     logger.info('Stripe Bank Charge', charge);
     res.sendStatus(StatusCodes.Post.success);
 });
 
 transactionsRouter.post('/card/pay', async (req, res) => {
-    const { txId, cardToken } = req.body;
+    const { txId, cardToken, passengerCount } = req.body;
     const tx = await Transaction.find(DB, txId);
     let stripeCustomerId = tx.customer.stripe;
 
@@ -109,7 +114,11 @@ transactionsRouter.post('/card/pay', async (req, res) => {
     }
 
     const charge = await Stripe.charge(
-        { amount: tx.amount, customer: stripeCustomerId, source: cardToken },
+        {
+            amount: toStripeAmount(tx.amount * parseInt(passengerCount), 'usd'),
+            customer: stripeCustomerId,
+            source: cardToken,
+        },
         StripeClient,
     );
     logger.info('Stripe Card Charge', charge);
