@@ -16,10 +16,13 @@ import logger from 'config/logger';
 
 const transactionsRouter = Router();
 
+const cardMarkup = amt => amt * 1.02;
+
 const toStripeAmount = (amount: number, currency: 'usd'): number => {
+    const toInt = (num: number) => parseInt(num.toFixed(0));
     switch (currency) {
         case 'usd':
-            return amount * 100; // to cents
+            return toInt(amount * 100); // to cents
         default:
             logger.warn('Currency Conversion not explicitly supported', { currency });
             return amount;
@@ -70,59 +73,71 @@ transactionsRouter.post('/', async (req, res) => {
  * Database: 1-2 reads (2 if new customer), 0-1 writes (1 if new customer)
  */
 transactionsRouter.post('/bank/pay', async (req, res) => {
-    const { publicToken, accountId, txId, passengerCount } = req.body;
-    const bankToken = await Plaid.toStripe(
-        await Plaid.getAccessToken(publicToken, PlaidClient),
-        accountId,
-        PlaidClient,
-    );
-    const transaction = await Transaction.find(DB, txId);
-    let stripeCustomerId = transaction.customer.stripe;
-    if (stripeCustomerId) {
-        await Stripe.updateDefaultSource(stripeCustomerId, bankToken, StripeClient);
-    } else {
-        const stripeCustomer = await Stripe.createCustomer(transaction.customer, StripeClient, { source: bankToken });
-        stripeCustomerId = stripeCustomer.id;
+    try {
+        const { public_token, account_id, txId, passengerCount } = req.body;
+        const bankToken = await Plaid.toStripe(
+            await Plaid.getAccessToken(public_token, PlaidClient),
+            account_id,
+            PlaidClient,
+        );
+        const transaction = await Transaction.find(DB, txId);
+        let stripeCustomerId = transaction.customer.stripe;
+        if (stripeCustomerId) {
+            await Stripe.updateDefaultSource(stripeCustomerId, bankToken, StripeClient);
+        } else {
+            const stripeCustomer = await Stripe.createCustomer(transaction.customer, StripeClient, {
+                source: bankToken,
+            });
+            stripeCustomerId = stripeCustomer.id;
 
-        // Update customer with stripe customer id
-        const customer = await Customer.find(DB, transaction.customer.id);
-        await customer.updateDoc({ stripe: stripeCustomerId }, Customer);
+            // Update customer with stripe customer id
+            const customer = await Customer.find(DB, transaction.customer.id);
+            await customer.updateDoc({ stripe: stripeCustomerId }, Customer);
+        }
+
+        const charge = await Stripe.charge(
+            {
+                amount: toStripeAmount(transaction.amount * parseInt(passengerCount), 'usd'),
+                customer: stripeCustomerId,
+            },
+            StripeClient,
+        );
+        logger.info('Stripe Bank Charge', charge);
+        res.sendStatus(StatusCodes.Post.success);
+    } catch (e) {
+        logger.error(e.name, { msg: e.message, stack: e.stack });
+        res.sendStatus(500);
     }
-
-    const charge = await Stripe.charge(
-        {
-            amount: toStripeAmount(transaction.amount * parseInt(passengerCount), 'usd'),
-            customer: stripeCustomerId,
-        },
-        StripeClient,
-    );
-    logger.info('Stripe Bank Charge', charge);
-    res.sendStatus(StatusCodes.Post.success);
 });
 
 transactionsRouter.post('/card/pay', async (req, res) => {
-    const { txId, cardToken, passengerCount } = req.body;
-    const tx = await Transaction.find(DB, txId);
-    let stripeCustomerId = tx.customer.stripe;
+    try {
+        const { txId, card_token, passengerCount } = req.body;
+        const tx = await Transaction.find(DB, txId);
+        logger.info('Card Pay Customer', tx.customer);
+        let stripeCustomerId = tx.customer.stripe;
 
-    if (!stripeCustomerId) {
-        const stripeCustomer = await Stripe.createCustomer(tx.customer, StripeClient);
-        stripeCustomerId = stripeCustomer.id;
-        // Update customer with stripe customer id
-        const customer = await Customer.find(DB, tx.customer.id);
-        await customer.updateDoc({ stripe: stripeCustomerId }, Customer);
+        if (!stripeCustomerId) {
+            const stripeCustomer = await Stripe.createCustomer(tx.customer, StripeClient);
+            stripeCustomerId = stripeCustomer.id;
+            // Update customer with stripe customer id
+            const customer = await Customer.find(DB, tx.customer.id);
+            await customer.updateDoc({ stripe: stripeCustomerId }, Customer);
+        }
+
+        const charge = await Stripe.charge(
+            {
+                amount: toStripeAmount(cardMarkup(tx.amount) * parseInt(passengerCount), 'usd'),
+                source: card_token,
+            },
+            StripeClient,
+        );
+        logger.info('Stripe Card Charge', charge);
+        res.sendStatus(StatusCodes.Post.success);
+    } catch (e) {
+        logger.error(e.name, { msg: e.message, stack: e.stack });
+        res.sendStatus(500);
     }
-
-    const charge = await Stripe.charge(
-        {
-            amount: toStripeAmount(tx.amount * parseInt(passengerCount), 'usd'),
-            customer: stripeCustomerId,
-            source: cardToken,
-        },
-        StripeClient,
-    );
-    logger.info('Stripe Card Charge', charge);
-    res.sendStatus(StatusCodes.Post.success);
 });
 
 export default transactionsRouter;
