@@ -81,6 +81,7 @@ transactionsRouter.post('/bank/pay', async (req, res) => {
             PlaidClient,
         );
         const transaction = await Transaction.find(DB, txId);
+        logger.info('Bank Pay Customer', transaction.customer);
         let stripeCustomerId = transaction.customer.stripe;
         if (stripeCustomerId) {
             await Stripe.updateDefaultSource(stripeCustomerId, bankToken, StripeClient);
