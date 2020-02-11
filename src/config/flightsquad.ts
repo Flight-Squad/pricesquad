@@ -1,5 +1,2 @@
-export const Squads = {
-  Chatsquad: process.env.CHATSQUAD_API,
-  Payment: process.env.PAYMENT_API,
-  Flightsquad: process.env.FLIGHTSQUAD_URL,
-}
+export const PaymentPageRoute = process.env.PAYMENT_PAGE;
+export const makePaymentUrl = (id: string): string => `${PaymentPageRoute}?id=${id}`;

@@ -1,54 +1,60 @@
 {
-  "name": "pricesquad",
-  "version": "1.0.0",
-  "main": "index.js",
-  "license": "SEE LICENSE IN LICENSE",
-  "engines": {
-    "node": ">=12.0"
-  },
-  "scripts": {
-    "clean": "rm -r ./bin",
-    "compile": "tsc",
-    "compile:win": "SET NODE_ENV=development&& tsc",
-    "docker": "npm run start",
-    "docker:debug": "npm run start",
-    "start": "npm run compile && node -r dotenv/config ./bin/index",
-    "start:win": "npm run compile:win && node -r dotenv/config ./bin/index",
-    "test": "npm run compile && ava",
-    "test:win": "npm run compile:win && ava",
-    "test-cover": "c8 --check-coverage --lines 100 npm run test",
-    "test-cover:win": "c8 --check-coverage --lines 100 npm run test:win"
-  },
-  "dependencies": {
-    "@types/app-root-path": "^1.2.4",
-    "@types/express": "^4.17.1",
-    "@types/morgan": "^1.7.37",
-    "@types/nightmare": "^2.10.4",
-    "@types/node": "^12.7.5",
-    "app-root-path": "^2.2.1",
-    "ava": "^2.4.0",
-    "aws-sdk": "^2.544.0",
-    "axios": "^0.19.0",
-    "c8": "^5.0.4",
-    "currency-formatter": "^1.5.5",
-    "dotenv": "^8.1.0",
-    "esm": "^3.2.25",
-    "express": "^4.17.1",
-    "firebase-admin": "^8.6.0",
-    "heroku-logger": "^0.3.3",
-    "module-alias": "^2.2.1",
-    "moment-timezone": "^0.5.26",
-    "typescript": "^3.6.3",
-    "uuid": "^3.3.3"
-  },
-  "_moduleAliases": {
-    "controllers": "./bin/controllers",
-    "api": "./bin/api",
-    "config": "./bin/config",
-    "data": "./bin/data",
-    "tests": "./bin/tests"
-  },
-  "devDependencies": {
-    "ts-node": "^8.4.1"
-  }
+    "name": "pricesquad",
+    "version": "1.0.0",
+    "main": "index.js",
+    "license": "SEE LICENSE IN LICENSE",
+    "engines": {
+        "node": ">=12.0"
+    },
+    "scripts": {
+        "clean": "rm -r ./bin",
+        "compile": "tsc",
+        "docker": "npm run start",
+        "docker:debug": "cross-env DEBUG=* npm run start",
+        "start": "npm run compile && node -r envkey ./bin/index",
+        "start:dev": "tsnd -r envkey -r tsconfig-paths/register -- src/index.ts",
+        "test": "npm run compile && ava",
+        "test-cover": "c8 --check-coverage --lines 100 npm run test"
+    },
+    "dependencies": {
+        "@flight-squad/admin": "0.0.50",
+        "@google-cloud/firestore": "^3.4.1",
+        "@google-cloud/storage": "^4.3.0",
+        "@types/app-root-path": "^1.2.4",
+        "@types/cors": "^2.8.6",
+        "@types/express": "^4.17.1",
+        "@types/morgan": "^1.7.37",
+        "@types/nightmare": "^2.10.4",
+        "@types/node": "^12.7.5",
+        "app-root-path": "^2.2.1",
+        "ava": "^2.4.0",
+        "aws-sdk": "^2.544.0",
+        "axios": "^0.19.0",
+        "c8": "^5.0.4",
+        "cors": "^2.8.5",
+        "currency-formatter": "^1.5.5",
+        "dotenv": "^8.1.0",
+        "envkey": "^1.2.7",
+        "esm": "^3.2.25",
+        "express": "^4.17.1",
+        "firebase-admin": "^8.9.2",
+        "heroku-logger": "^0.3.3",
+        "module-alias": "^2.2.1",
+        "moment-timezone": "^0.5.26",
+        "typescript": "^3.6.3",
+        "uuid": "^3.3.3"
+    },
+    "_moduleAliases": {
+        "controllers": "./bin/controllers",
+        "api": "./bin/api",
+        "config": "./bin/config",
+        "data": "./bin/data",
+        "tests": "./bin/tests"
+    },
+    "devDependencies": {
+        "cross-env": "^6.0.3",
+        "ts-node": "^8.4.1",
+        "ts-node-dev": "^1.0.0-pre.44",
+        "tsconfig-paths": "^3.9.0"
+    }
 }
