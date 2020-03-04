@@ -11,8 +11,9 @@
         "compile": "tsc",
         "docker": "npm run start",
         "docker:debug": "cross-env DEBUG=* npm run start",
-        "start": "npm run compile && node -r envkey ./bin/index",
+        "start": "npm run compile && node -r envkey -r module-alias/register ./bin/index",
         "start:dev": "tsnd -r envkey -r tsconfig-paths/register -- src/index.ts",
+        "start:prod": "cross-env NODE_ENV=production tsnd -r envkey -r tsconfig-paths/register -- src/index.ts",
         "test": "npm run compile && ava",
         "test-cover": "c8 --check-coverage --lines 100 npm run test"
     },
