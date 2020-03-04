@@ -1,30 +1,44 @@
 import express from 'express';
-import appRoot from 'app-root-path'
+import cors from 'cors';
 
 // import scraperRouter from './scrape';
-import routes from './config/routeDefinitions';
 import StatusCodes from './config/statusCodes';
-import priceRouter from './prices';
 
-import logger  from 'config/logger';
-import requestsRouter from './tripRequests';
-import airportRouter from './airport';
+import logger from 'config/logger';
+import transactionsRouter from './transactions';
 
-var app = express();
+const app = express();
 
-// 'combined' is the standard Apache log format
-// https://stackoverflow.com/a/51918846
+// ONLY FOR DEVELOPMENT
+app.use(cors());
 
+// For Production/Staging
+
+// // From https://daveceddia.com/access-control-allow-origin-cors-errors-in-react-express/
+// // Set up a whitelist and check against it:
+// // List of internal apis that can/should access this server
+// var whitelist = ['http://example1.com', 'http://example2.com']
+// var corsOptions = {
+//   origin: function (origin, callback) {
+//     if (whitelist.indexOf(origin) !== -1) {
+//       callback(null, true)
+//     } else {
+//       callback(new Error('Not allowed by CORS'))
+//     }
+//   }
+// }
+
+// // Then pass them to cors:
+// app.use(cors(corsOptions));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // extended flag enables nested objects
 
-app.use('/prices', priceRouter);
-app.use('/', requestsRouter);
-app.use('/airports', airportRouter);
+app.use('/transactions', transactionsRouter);
+
+app.get('/', (req, res) => {
+    res.status(StatusCodes.Get.success).send('OK');
+});
 
 const port = process.env.PORT || 3000;
-app.get('/', (req, res) => {
-  res.status(StatusCodes.Get.success).send('Hi');
-})
-app.listen(port, () => logger.info(`Listening on port ${port}`))
+app.listen(port, () => logger.info(`Listening on port ${port}`));
